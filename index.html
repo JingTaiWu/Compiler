@@ -10,14 +10,43 @@
         <script type="text/javascript" src="bootstrap/jquery-1.11.1.min.js"></script>
         <script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
         <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="dist/styles/style.css" />
     </head>
     <body>
+        <!-- Navigation bar -->
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
                 <div class="navbar-header">
-                    <h1 class="navbar-text navbar-left">Jing-Piler</h1>
+                    <h1 class="navbar-text navbar-left">
+                        <span class="glyphicon glyphicon-bell"></span>
+                        Jing-Piler
+                    </h1>
                 </div>
             </div>
         </nav>
+
+        <!-- Main Container -->
+        <div id="divMain" class="container theme-showcase" role="main">
+            <!-- Code Input Box -->
+            <div class="col-md-6">
+                <div id="input" class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2>Code Input</h2>
+                    </div>
+                    <div class="panel-body">
+                        <textarea id="codeInput"></textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- Log -->
+            <div class="col-md-6">
+                <div id="log" class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2>Log</h2>
+                    </div>
+                    <div class="panel-body"></div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

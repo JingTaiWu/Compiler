@@ -1,0 +1,25 @@
+body {
+    padding-top: 80px;
+}
+
+#divMain {
+    padding-top: 80px;
+}
+
+#input {
+    height: 600px;
+}
+
+#codeInput {
+    height: 480px;
+    width: 100%;
+    resize: none;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#log {
+    height: 600px;
+    overflow: auto;
+}
