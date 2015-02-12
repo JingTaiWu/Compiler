@@ -47,24 +47,31 @@
 
         <!-- Main Container -->
         <div id="divMain" class="container theme-showcase" role="main">
-            <!-- Code Input Box -->
-            <div class="col-md-6">
-                <div id="input" class="panel panel-default">
-                    <div class="panel-heading">
-                        <h2>Code Input</h2>
-                    </div>
-                    <div class="panel-body">
-                        <textarea id="codeInput"></textarea>
-                    </div>
+            <div class="row">
+                <!-- Code Input Box -->
+                <div class="col-md-6">
+                    <textarea id="codeInput"></textarea>
                 </div>
-            </div>
-            <!-- Log -->
-            <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h2>Log</h2>
+
+                <div class="col-md-6">
+                    <div class="row">
+                        <!-- Log-->
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <strong>Log</strong>
+                            </div>
+                            <div class="panel-body list-group" id="log"></div>
+                        </div>
                     </div>
-                    <div class="panel-body" id="log">
+
+                    <!-- Tokens -->
+                    <div class="row">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <strong>Tokens</strong>
+                            </div>
+                            <div class="panel-body" id="tokens"></div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -9,8 +9,8 @@ module Compiler {
         public static init() {
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
-            var Lexer = new Compiler.Lexer(input);
-            Lexer.readChar();
+            LEXER = new Compiler.Lexer(input);
+            LEXER.toTokens();
         }
     }
 }
