@@ -9,8 +9,19 @@
         <!--Bootstrap Essentials -->
         <script type="text/javascript" src="bootstrap/jquery-1.11.1.min.js"></script>
         <script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
+
+        <!-- Plugins -->
+        <script type="text/javascript" src="resources/jquery-linedtextarea.js"></script>
+
+        <!-- Compiler Essentials -->
+        <script type="text/javascript" src="dist/scripts/Token.js"></script>     
+        <script type="text/javascript" src="dist/scripts/Lexer.js"></script>
+        <script type="text/javascript" src="dist/scripts/Control.js"></script>
+
+        <!-- CSS files -->
         <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="dist/styles/style.css" />
+        <link rel="stylesheet" type="text/css" href="resources/jquery-linedtextarea.css" />
     </head>
     <body>
         <!-- Navigation bar -->
@@ -21,6 +32,15 @@
                         <span class="glyphicon glyphicon-bell"></span>
                         Jing-Piler
                     </h1>
+                </div>
+                <div class="navbar-right">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default btn-lg navbar-btn btn-success" id="compile">
+                            Compile
+                            &nbsp
+                            <span class="glyphicon glyphicon-play"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -40,13 +60,22 @@
             </div>
             <!-- Log -->
             <div class="col-md-6">
-                <div id="log" class="panel panel-default">
+                <div class="panel panel-default">
                     <div class="panel-heading">
                         <h2>Log</h2>
                     </div>
-                    <div class="panel-body"></div>
+                    <div class="panel-body" id="log">
+                    </div>
                 </div>
             </div>
         </div>
     </body>
+
+    <!-- LinedTextArea -->
+    <script>
+        $("#codeInput").linedtextarea();
+        $("#compile").click(function() {
+            Compiler.Control.init();
+        })
+    </script>
 </html>
