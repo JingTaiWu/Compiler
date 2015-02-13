@@ -16,6 +16,7 @@ var Compiler;
             var input = $("#codeInput").val();
             LEXER = new Compiler.Lexer(input);
             LEXER.toTokens();
+            this.displayToken(LEXER.getTokens());
         };
 
         // For standard log output
@@ -36,6 +37,20 @@ var Compiler;
 
             $("#log").append(errStr);
             Control.scroll();
+        };
+
+        // For displaying all the tokens
+        Control.displayToken = function (src) {
+            for (var j = 0; j < src.length; j++) {
+                var token = src[j];
+                var num = "<td>" + (j + 1) + "</td>";
+                var name = "<td>" + token.getName() + "</td>";
+                var value = "<td>" + token.getValue() + "</td>";
+                var row = "<tr>" + num + name + value + "</tr>";
+
+                // Append the row to the table
+                $("#tokens > tbody").append(row);
+            }
         };
 
         // For log scrolling

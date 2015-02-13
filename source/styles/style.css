@@ -19,7 +19,10 @@ body {
     overflow-y: auto;
 }
 
-#tokens {
-    height: 100px;
+#tokens > thead {
+    font-weight: bold;
+}
+
+#tokens > tbody {
     overflow-y: auto;
 }
