@@ -105,16 +105,16 @@ var Compiler;
             var intop = /^\+$/;
 
             // Braces
-            var brace = /^(\{)|(\})$/;
+            var brace = /^(\{|\})$/;
 
             // while, if, print
-            var keyword = /^(print)|(while)|(if)$/;
+            var keyword = /^((print)|(while)|(if))$/;
 
             // assignment operator
-            var assign = /^\=$/;
+            var assign = /^=$/;
 
             // parenthesis
-            var parenthesis = /^(\()|(\))$/;
+            var parenthesis = /^(\(|\))$/;
 
             // EOF
             var EOF = /^\$$/;
