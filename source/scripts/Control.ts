@@ -8,12 +8,13 @@ module Compiler {
         // Initializes UI elements
         public static init() {
             // clear all the panels
-            $("#log").empty();
+            $("#log, #tokenTable > tbody:last").empty();
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
             LEXER = new Compiler.Lexer(input);
-            LEXER.toTokens();
-            this.displayToken(LEXER.getTokens());
+            if(LEXER.toTokens()) {
+                this.displayToken(LEXER.getTokens());
+            }
         }
 
         // For standard log output

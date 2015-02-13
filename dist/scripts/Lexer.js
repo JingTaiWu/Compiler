@@ -25,10 +25,6 @@ var Compiler;
             // RegEx
             var DELIMITER = /([a-z]+)|(\d+)|("[^"]*")|(==)|(!=)|(\S)/g;
 
-            // The Lexer reads the code character by character
-            // It will only match patterns when it encounters a space
-            // However, if it discovers a quotation mark, all the characters after the quotation
-            // becomes a string token
             if (this.input == "") {
                 this.stdErr("Please put some code in.");
                 return;
@@ -57,13 +53,15 @@ var Compiler;
                             // If not, throw an error
                             this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
                             this.stdErr("Terminated.");
-                            return;
+                            return false;
+                            ;
                         }
                     }
                 }
             }
 
             this.stdOut("EOF reached. No errors found.");
+            return true;
         };
 
         // Match an input with DFAs in our grammar
