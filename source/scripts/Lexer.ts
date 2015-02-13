@@ -34,6 +34,11 @@ module Compiler {
             // However, if it discovers a quotation mark, all the characters after the quotation
             // becomes a string token
 
+            if(this.input == "") {
+                this.stdErr("Please put some code in.");
+                return;
+            }
+
             this.stdOut("Processing the code...");
 
             // Separate the input line by line
@@ -55,7 +60,7 @@ module Compiler {
                             this.tokens.push(result);
                         } else {
                             // If not, throw an error
-                            this.stdErr("Invalid Token: " + word + " on line " + (lineNumber + 1) + ".");
+                            this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
                             this.stdErr("Terminated.");
                             return;
                         }

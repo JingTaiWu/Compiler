@@ -10,7 +10,7 @@ var Compiler;
         // Initializes UI elements
         Control.init = function () {
             // clear all the panels
-            $("#log, #tokens").empty();
+            $("#log").empty();
 
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
@@ -49,7 +49,12 @@ var Compiler;
                 var row = "<tr>" + num + name + value + "</tr>";
 
                 // Append the row to the table
-                $("#tokens > tbody").append(row);
+                $("#tokenTable > tbody:last").append(row);
+
+                // Scroll
+                $("#tokenPanel").animate({
+                    scrollTop: $("#tokenPanel")[0].scrollHeight
+                }, 200);
             }
         };
 

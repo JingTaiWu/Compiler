@@ -8,7 +8,7 @@ module Compiler {
         // Initializes UI elements
         public static init() {
             // clear all the panels
-            $("#log, #tokens").empty();
+            $("#log").empty();
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
             LEXER = new Compiler.Lexer(input);
@@ -46,7 +46,11 @@ module Compiler {
                 var value = "<td>" + token.getValue() + "</td>";
                 var row = "<tr>" + num + name + value + "</tr>";
                 // Append the row to the table
-                $("#tokens > tbody").append(row);
+                $("#tokenTable > tbody:last").append(row);
+                // Scroll
+                $("#tokenPanel").animate({
+                    scrollTop: $("#tokenPanel")[0].scrollHeight
+                }, 200);
             }
         }
 

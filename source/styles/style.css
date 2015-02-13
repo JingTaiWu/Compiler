@@ -15,14 +15,15 @@ body {
 
 #log {
     font-size: 13px;
-    height: 500px;
+    height: 250px;
     overflow-y: auto;
 }
 
-#tokens > thead {
+#tokenPanel {
+    height: 120px;
+    overflow-y: auto;
+}
+
+#tokenTable > thead {
     font-weight: bold;
-}
-
-#tokens > tbody {
-    overflow-y: auto;
 }
