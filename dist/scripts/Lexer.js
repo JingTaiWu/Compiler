@@ -1,6 +1,6 @@
 /// <reference path="jquery.d.ts"/>
 /*
-Lexer - First part of the compiler. Lexer reads the code character by character and creates token
+Lexer/Scanner - First part of the compiler. Lexer reads the code character by character and creates token
 */
 var Compiler;
 (function (Compiler) {
@@ -16,13 +16,10 @@ var Compiler;
         //       Read/String mode to separate string reading and token reading.
         // Convert User code into tokens, return null if it doesn't match
         Lexer.prototype.toTokens = function () {
-            // Space (as a separator)
-            var space = /^(\s)|(\t)|(\n)$/;
-
             // Boolean for string mode
             var stringMode = false;
 
-            // RegEx
+            // RegEx for delimiter
             var DELIMITER = /([a-z]+)|(\d+)|("[^"]*")|(==)|(!=)|(\S)/g;
 
             if (this.input == "") {
@@ -34,6 +31,7 @@ var Compiler;
 
             // Separate the input line by line
             var lines = this.input.trim().split("\n");
+
             for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
                 // Get a line of code
                 var line = lines[lineNumber];
@@ -41,20 +39,22 @@ var Compiler;
                 if (line) {
                     // Separate the line into words
                     var words = line.match(DELIMITER);
-                    for (var i = 0; i < words.length; i++) {
-                        var word = words[i];
-                        this.stdOut("Trying to match word: " + word);
-                        var result = this.matchToken(word, lineNumber + 1);
+                    if (words) {
+                        for (var i = 0; i < words.length; i++) {
+                            var word = words[i];
+                            this.stdOut("Trying to match word: " + word);
+                            var result = this.matchToken(word, lineNumber + 1);
 
-                        // If there is a match, add it to the tokens list
-                        if (result) {
-                            this.tokens.push(result);
-                        } else {
-                            // If not, throw an error
-                            this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
-                            this.stdErr("Terminated.");
-                            return false;
-                            ;
+                            // If there is a match, add it to the tokens list
+                            if (result) {
+                                this.tokens.push(result);
+                            } else {
+                                // If not, throw an error
+                                this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
+                                this.stdErr("Terminated.");
+                                return false;
+                                ;
+                            }
                         }
                     }
                 }
@@ -64,7 +64,7 @@ var Compiler;
             return true;
         };
 
-        // Match an input with DFAs in our grammar
+        // Match an input with Regexs in our grammar
         Lexer.prototype.matchToken = function (pattern, lineNumber) {
             // Type Tokens
             var type_int = /^int$/;
