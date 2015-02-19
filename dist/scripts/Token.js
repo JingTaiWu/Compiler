@@ -4,14 +4,14 @@ Token - Lexer reads the code character by character and converts words into Toke
 var Compiler;
 (function (Compiler) {
     var Token = (function () {
-        function Token(name, value, lineNumber) {
-            this.name = name;
+        function Token(kind, value, lineNumber) {
+            this.kind = kind;
             this.value = value;
             this.lineNumber = lineNumber;
         }
         // Getters and Setters
-        Token.prototype.getName = function () {
-            return this.name;
+        Token.prototype.getKind = function () {
+            return this.kind;
         };
 
         Token.prototype.getValue = function () {

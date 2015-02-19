@@ -1,10 +1,10 @@
 body {
     padding-top: 80px;
     background-image: url("subtle_white_mini_waves.png");
+    background-repeat: repeat;
 }
 
 #divMain {
-    padding-top: 80px;
 }
 
 #codeInput {

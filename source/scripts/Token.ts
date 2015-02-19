@@ -5,20 +5,20 @@ module Compiler {
     export class Token {
         // Properties of Token
         // name - The name of the token
-        private name: string;
+        private kind: string;
         // value -  The value of the input
         private value: string;
         // lineNumber - The line number in which the token was found
         private lineNumber: number;
-        constructor(name: string, value: string, lineNumber: number) {
-            this.name = name;
+        constructor(kind: string, value: string, lineNumber: number) {
+            this.kind = kind;
             this.value = value;
             this.lineNumber = lineNumber;
         }
 
         // Getters and Setters
-        public getName(): string {
-            return this.name;
+        public getKind(): string {
+            return this.kind;
         }
 
         public getValue(): string {

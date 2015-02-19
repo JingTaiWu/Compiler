@@ -43,7 +43,7 @@ module Compiler {
             for(var j = 0; j < src.length; j++) {
                 var token = src[j];
                 var num = "<td>" + (j + 1) + "</td>";
-                var name = "<td>" + token.getName() + "</td>";
+                var name = "<td>" + token.getKind() + "</td>";
                 var value = "<td>" + token.getValue() + "</td>";
                 var row = "<tr>" + num + name + value + "</tr>";
                 // Append the row to the table

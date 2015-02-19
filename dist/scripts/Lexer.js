@@ -9,6 +9,7 @@ var Compiler;
             // Replace /t with nothing
             this.input = input;
             this.count = 0;
+            this.stringMode = false;
             this.tokens = [];
         }
         // TODO: Create DFAs of the grammar provided in Alan's website
@@ -20,8 +21,9 @@ var Compiler;
             var stringMode = false;
 
             // RegEx for delimiter
-            var DELIMITER = /([a-z]+)|(\d+)|("[^"]*")|(==)|(!=)|(\S)/g;
+            var DELIMITER = /([a-z]+)|(\d+)|(")|(==)|(!=)|(\S)/g;
 
+            // var DELIMITER = /([a-z]+)|(\d+)|("[^"]*")|(==)|(!=)|(\S)/g;
             if (this.input == "") {
                 this.stdErr("Please put some code in.");
                 return;
@@ -42,18 +44,32 @@ var Compiler;
                     if (words) {
                         for (var i = 0; i < words.length; i++) {
                             var word = words[i];
-                            this.stdOut("Trying to match word: " + word);
-                            var result = this.matchToken(word, lineNumber + 1);
-
-                            // If there is a match, add it to the tokens list
-                            if (result) {
-                                this.tokens.push(result);
+                            if (this.stringMode) {
+                                for (var j = 0; j < word.length; j++) {
+                                    var character = word[j];
+                                    var characterToken = this.matchChar(character, lineNumber + 1);
+                                    if (characterToken) {
+                                        this.tokens.push(characterToken);
+                                    } else {
+                                        this.stdErr("Invalid string character: <strong>" + character + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
+                                        this.stdErr("Terminated.");
+                                        return false;
+                                    }
+                                }
                             } else {
-                                // If not, throw an error
-                                this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
-                                this.stdErr("Terminated.");
-                                return false;
-                                ;
+                                this.stdOut("Trying to match word: " + word);
+                                var result = this.matchToken(word, lineNumber + 1);
+
+                                // If there is a match, add it to the tokens list
+                                if (result) {
+                                    this.tokens.push(result);
+                                } else {
+                                    // If not, throw an error
+                                    this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
+                                    this.stdErr("Terminated.");
+                                    return false;
+                                    ;
+                                }
                             }
                         }
                     }
@@ -71,7 +87,7 @@ var Compiler;
             var type_string = /^string$/;
             var type_boolean = /^boolean$/;
 
-            // Char
+            // Identifier character
             var character = /^[a-z]$/;
 
             // Digit
@@ -90,7 +106,9 @@ var Compiler;
             var brace = /^(\{|\})$/;
 
             // while, if, print
-            var keyword = /^((print)|(while)|(if))$/;
+            var printKeyword = /^print$/;
+            var whileKeyword = /^while$/;
+            var ifKeyword = /^if$/;
 
             // assignment operator
             var assign = /^=$/;
@@ -102,14 +120,16 @@ var Compiler;
             var EOF = /^\$$/;
 
             // String token
-            var str = /".*"/;
+            var quotation = /"/;
 
             // This is just going to be a big if statment
             // Ordered from the longest first
             if (type_boolean.test(pattern) || type_string.test(pattern) || type_int.test(pattern)) {
                 return new Compiler.Token("TYPE_TOKEN", pattern, lineNumber);
-            } else if (str.test(pattern)) {
-                return new Compiler.Token("STRING_TOKEN", pattern, lineNumber);
+            } else if (quotation.test(pattern)) {
+                // If it discovers a quotation token, negate the stringmode
+                this.stringMode = !this.stringMode;
+                return new Compiler.Token("QUOTATION_TOKEN", pattern, lineNumber);
             } else if (character.test(pattern)) {
                 return new Compiler.Token("IDENTIFIER_TOKEN", pattern, lineNumber);
             } else if (digit.test(pattern)) {
@@ -122,14 +142,31 @@ var Compiler;
                 return new Compiler.Token("INT_OP_TOKEN", pattern, lineNumber);
             } else if (brace.test(pattern)) {
                 return new Compiler.Token("BRACE_TOKEN", pattern, lineNumber);
-            } else if (keyword.test(pattern)) {
-                return new Compiler.Token("KEYWORD_TOKEN", pattern, lineNumber);
+            } else if (printKeyword.test(pattern) || whileKeyword.test(pattern) || ifKeyword.test(pattern)) {
+                return new Compiler.Token("RESERVED_WORD_TOKEN", pattern, lineNumber);
             } else if (assign.test(pattern)) {
                 return new Compiler.Token("ASSIGN_OP_TOKEN", pattern, lineNumber);
             } else if (parenthesis.test(pattern)) {
                 return new Compiler.Token("PARENTHESIS_TOKEN", pattern, lineNumber);
             } else if (EOF.test(pattern)) {
                 return new Compiler.Token("EOF_TOKEN", pattern, lineNumber);
+            } else {
+                return null;
+            }
+        };
+
+        // Matching characters in string mode
+        Lexer.prototype.matchChar = function (pattern, lineNumber) {
+            var character = /^[a-z]$/;
+            var quotation = /^"$/;
+
+            // If the character is a quotation, negate the stringMode and add the quotation token
+            if (quotation.test(pattern)) {
+                this.stringMode = !this.stringMode;
+                this.stdOut("Trying to match word: " + pattern);
+                return new Compiler.Token("QUOTATION_TOKEN", pattern, lineNumber);
+            } else if (character.test(pattern)) {
+                return new Compiler.Token("CHARACTER_TOKEN", pattern, lineNumber);
             } else {
                 return null;
             }
