@@ -132,7 +132,7 @@ var Compiler;
                 this.parseIntExpr();
             } else if (this.currentToken.getKind() == "QUOTATION_TOKEN") {
                 this.parseStringExpr();
-            } else if (this.currentToken.getKind() == "OPEN_PARENTHESIS_TOKEN") {
+            } else if (this.currentToken.getKind() == "BOOL_VAL_TOKEN" || this.currentToken.getKind() == "OPEN_PARENTHESIS_TOKEN") {
                 this.parseBooleanExpr();
             } else {
                 this.parseId();
@@ -142,13 +142,16 @@ var Compiler;
         // parseIntExpr - IntExpr ::== digit intop Expr
         //                        ::== digit
         Parser.prototype.parseIntExpr = function () {
-            var nextToken = this.peek();
-            this.stdOut("parse integer statement");
+            var nextToken = this.tokenStream[this.index];
+            this.stdOut("Next Token " + nextToken.getKind() + " " + nextToken.getValue());
+            this.stdOut("current Index " + this.index);
             if (nextToken.getKind() == "INT_OP_TOKEN") {
+                this.stdOut("parse integer statement D OP EXPR");
                 this.checkToken("DIGIT_TOKEN");
                 this.checkToken("INT_OP_TOKEN");
                 this.parseExpr();
             } else {
+                this.stdOut("parse integer statement D");
                 this.checkToken("DIGIT_TOKEN");
             }
         };
