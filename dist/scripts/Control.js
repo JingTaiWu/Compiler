@@ -17,6 +17,8 @@ var Compiler;
             LEXER = new Compiler.Lexer(input);
             if (LEXER.toTokens()) {
                 this.displayToken(LEXER.getTokens());
+                PARSER = new Compiler.Parser(LEXER.getTokens());
+                PARSER.parse();
             }
         };
 

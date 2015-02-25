@@ -27,8 +27,8 @@ module Compiler {
             // Boolean for string mode
             var stringMode = false;
             // RegEx for delimiter
-            var DELIMITER = /([a-z]+)|(\d+)|(")|(==)|(!=)|(\S)/g;
-            // var DELIMITER = /([a-z]+)|(\d+)|("[^"]*")|(==)|(!=)|(\S)/g;
+            // var DELIMITER = /([a-z]+)|(\d+)|(")|(==)|(!=)|(\S)/g;
+            var DELIMITER = /([a-z]+)|(\d+)|("[^"]*")|(==)|(!=)|(\S)/g;
 
             if(this.input == "") {
                 this.stdErr("Please put some code in.");
@@ -50,38 +50,43 @@ module Compiler {
                     if(words) {
                         for(var i = 0; i < words.length; i++) {
                             var word = words[i];
-                            if(this.stringMode) {
-                                for(var j = 0; j < word.length; j++) {
-                                    var character = word[j];
-                                    var characterToken = this.matchChar(character, lineNumber + 1);
-                                    if(characterToken) {
-                                        this.tokens.push(characterToken);
-                                    } else {
-                                        this.stdErr("Invalid string character: <strong>" + character + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
-                                        this.stdErr("Terminated.");
-                                        return false;
+                            //this.stdOut("Trying to match word: " + word);
+                            var result = this.matchToken(word, lineNumber + 1);
+
+                            // If there is a match, add it to the tokens list
+                            if(result) {
+                                if(result.getKind() == "STRING_TOKEN") {
+                                    // If it is a string token, break it down to character tokens
+                                    var str = result.getValue();
+                                    for(var j = 0; j < str.length; j++) {
+                                        var curChar = str[j];
+                                        var character = /^[a-z]$/;
+                                        if(curChar == "\"") {
+                                            this.tokens.push(new Token("QUOTATION_TOKEN", curChar, lineNumber + 1));
+                                        } else if(curChar == " ") {
+                                            this.tokens.push(new Token("SPACE_TOKEN", curChar, lineNumber + 1));
+                                        } else if(character.test(curChar)) {
+                                            this.tokens.push(new Token("CHARACTER_TOKEN", curChar, lineNumber + 1));
+                                        } else {
+                                            this.stdErr("Invalid String Character: <strong>" + curChar + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
+                                            return false;
+                                        }
                                     }
+                                } else {
+                                    this.tokens.push(result);
                                 }
                             } else {
-                                this.stdOut("Trying to match word: " + word);
-                                var result = this.matchToken(word, lineNumber + 1);
-
-                                // If there is a match, add it to the tokens list
-                                if(result) {
-                                    this.tokens.push(result);
-                                } else {
-                                    // If not, throw an error
-                                    this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
-                                    this.stdErr("Terminated.");
-                                    return false;;
-                                }                                
-                            }
+                                // If not, throw an error
+                                this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
+                                this.stdErr("Terminated.");
+                                return false;
+                            }                                
                         }
                     }
                 }
             }
 
-            this.stdOut("EOF reached. No errors found.");
+            this.stdOut("EOF reached. No LEX errors found.");
             return true;
         }
 
@@ -102,7 +107,8 @@ module Compiler {
             // Intop
             var intop = /^\+$/;
             // Braces
-            var brace = /^(\{|\})$/;
+            var openBrace = /^\{$/;
+            var closeBrace = /^\}$/;    
             // while, if, print
             var printKeyword = /^print$/;
             var whileKeyword = /^while$/;
@@ -110,20 +116,21 @@ module Compiler {
             // assignment operator
             var assign = /^=$/;
             // parenthesis
-            var parenthesis = /^(\(|\))$/;
+            var openParent = /^\($/;
+            var closeParent = /^\)$/;
             // EOF
             var EOF = /^\$$/;
             // String token
             var quotation = /"/;
+            // Space token
+            var space = /^\s$/;
+            // match string token
+            var str = /^("[^"]*")$/;
 
             // This is just going to be a big if statment
             // Ordered from the longest first
             if(type_boolean.test(pattern) || type_string.test(pattern) || type_int.test(pattern)) {
                 return new Token("TYPE_TOKEN", pattern, lineNumber);
-            } else if(quotation.test(pattern)) {
-                // If it discovers a quotation token, negate the stringmode
-                this.stringMode = !this.stringMode;
-                return new Token("QUOTATION_TOKEN", pattern, lineNumber);
             } else if(character.test(pattern)) {
                 return new Token("IDENTIFIER_TOKEN", pattern, lineNumber);
             } else if(digit.test(pattern)) {
@@ -134,36 +141,52 @@ module Compiler {
                 return new Token("BOOL_VAL_TOKEN", pattern, lineNumber);
             } else if(intop.test(pattern)) {
                 return new Token("INT_OP_TOKEN", pattern, lineNumber);
-            } else if(brace.test(pattern)) {
-                return new Token("BRACE_TOKEN", pattern, lineNumber);
-            } else if(printKeyword.test(pattern) || whileKeyword.test(pattern) || ifKeyword.test(pattern)) {
-                return new Token("RESERVED_WORD_TOKEN", pattern, lineNumber);
+            } else if(openBrace.test(pattern)) {
+                return new Token("OPEN_BRACE_TOKEN", pattern, lineNumber);
+            } else if(closeBrace.test(pattern)) {
+                return new Token("CLOSE_BRACE_TOKEN", pattern, lineNumber);
+            } else if(printKeyword.test(pattern)) {
+                return new Token("PRINT_KEYWORD_TOKEN", pattern, lineNumber);
+            } else if(whileKeyword.test(pattern)) {
+                return new Token("WHILE_KEYWORD_TOKEN", pattern, lineNumber);
+            } else if(ifKeyword.test(pattern)) {
+                return new Token("IF_KEYWORD_TOKEN", pattern, lineNumber);
             } else if(assign.test(pattern)) {
                 return new Token("ASSIGN_OP_TOKEN", pattern, lineNumber);
-            } else if(parenthesis.test(pattern)) {
-                return new Token("PARENTHESIS_TOKEN", pattern, lineNumber);
+            } else if(openParent.test(pattern)) {
+                return new Token("OPEN_PARENTHESIS_TOKEN", pattern, lineNumber);
+            } else if(closeParent.test(pattern)) {
+                return new Token("CLOSE_PARENTHESIS_TOKEN", pattern, lineNumber);
             } else if(EOF.test(pattern)) {
                 return new Token("EOF_TOKEN", pattern, lineNumber);
+            } else if(space.test(pattern)) {
+                return new Token("SPACE_TOKEN", pattern, lineNumber);
+            } else if(str.test(pattern)) {
+                return new Token("STRING_TOKEN", pattern, lineNumber);
+            } else if(quotation.test(pattern)) {
+                // If it discovers a quotation token, negate the stringmode
+                this.stringMode = !this.stringMode;
+                return new Token("QUOTATION_TOKEN", pattern, lineNumber);
             } else {
                 return null;
             }
         }
 
         // Matching characters in string mode
-        public matchChar(pattern: string, lineNumber: number): Token {
-            var character = /^[a-z]$/;
-            var quotation = /^"$/;
-            // If the character is a quotation, negate the stringMode and add the quotation token
-            if(quotation.test(pattern)) {
-                this.stringMode = !this.stringMode;
-                this.stdOut("Trying to match word: " + pattern);
-                return new Token("QUOTATION_TOKEN", pattern, lineNumber);
-            } else if(character.test(pattern)) {
-                return new Token("CHARACTER_TOKEN", pattern, lineNumber);
-            } else {
-                return null;
-            }
-        }
+        // public matchChar(pattern: string, lineNumber: number): Token {
+        //     var character = /^[a-z]$/;
+        //     var quotation = /^"$/;
+        //     // If the character is a quotation, negate the stringMode and add the quotation token
+        //     if(quotation.test(pattern)) {
+        //         this.stringMode = !this.stringMode;
+        //         this.stdOut("Trying to match word: " + pattern);
+        //         return new Token("QUOTATION_TOKEN", pattern, lineNumber);
+        //     } else if(character.test(pattern)) {
+        //         return new Token("CHARACTER_TOKEN", pattern, lineNumber);
+        //     } else {
+        //         return null;
+        //     }
+        // }
 
         public stdOut(msg: string) {
             Control.stdOut("LEXER", msg);
