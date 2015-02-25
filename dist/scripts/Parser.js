@@ -9,6 +9,7 @@ var Compiler;
         function Parser(tokenStream) {
             this.tokenStream = tokenStream;
             this.index = 0;
+            this.errorCount = 0;
         }
         // parse - The beginning step of parsing
         Parser.prototype.parse = function () {
@@ -18,6 +19,11 @@ var Compiler;
 
             // Program is our ultimate production
             this.parseProgram();
+            if (this.errorCount == 0) {
+                Compiler.Control.stdNVOut("PARSER", "Parsing Success. Found 0 errors.");
+            } else {
+                this.stdErr("Parsing Failed. Found " + this.errorCount + " error.");
+            }
         };
 
         // parseProgram - Program ::== Block $
@@ -209,6 +215,7 @@ var Compiler;
                 return true;
             } else {
                 this.stdErr("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue() + ". On line " + this.currentToken.getLineNumber());
+                this.errorCount++;
                 return false;
             }
         };

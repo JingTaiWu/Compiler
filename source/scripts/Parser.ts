@@ -8,11 +8,13 @@ module Compiler {
         private tokenStream: Token[];
         private index: number;
         private currentToken: Token;
+        private errorCount: number;
 
         // Constructor - Takes in a token stream
         constructor(tokenStream: Token[]) {
             this.tokenStream = tokenStream;
             this.index = 0;
+            this.errorCount = 0;
         }
 
         // parse - The beginning step of parsing
@@ -22,6 +24,11 @@ module Compiler {
             this.stdOut("Begin Parsing...");
             // Program is our ultimate production
             this.parseProgram();
+            if(this.errorCount == 0) {
+                Control.stdNVOut("PARSER", "Parsing Success. Found 0 errors.");
+            } else {
+                this.stdErr("Parsing Failed. Found " + this.errorCount + " error.");
+            }
         }
 
         // parseProgram - Program ::== Block $
@@ -218,6 +225,7 @@ module Compiler {
                 return true;
             } else {
                 this.stdErr("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue() + ". On line " + this.currentToken.getLineNumber());
+                this.errorCount++;
                 return false;
             }
         }
