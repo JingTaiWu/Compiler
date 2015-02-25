@@ -86,7 +86,7 @@ module Compiler {
                 }
             }
 
-            this.stdOut("EOF reached. No LEX errors found.");
+            Control.stdNVOut("LEXER", "EOF reached. No LEX errors found.");
             return true;
         }
 

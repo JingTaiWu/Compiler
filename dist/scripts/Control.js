@@ -24,12 +24,16 @@ var Compiler;
 
         // For standard log output
         Control.stdOut = function (src, msg) {
+            if (!Control.isVerbose) {
+                return;
+            }
+
             //var icon = "<span class='glyphicon glyphicon-circle-arrow-right'></span>&nbsp";
             var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
             var printStr = "<div class='list-group-item list-group-item-info'>" + label + msg + "</div>";
 
             $("#log").append(printStr);
-            Control.scroll();
+            //Control.scroll();
         };
 
         // For standard error output
@@ -39,6 +43,16 @@ var Compiler;
             var errStr = "<div class='list-group-item list-group-item-danger'>" + label + msg + "</div>";
 
             $("#log").append(errStr);
+            Control.scroll();
+        };
+
+        // For non verbose output
+        Control.stdNVOut = function (src, msg) {
+            //var icon = "<span class='glyphicon glyphicon-circle-arrow-right'></span>&nbsp";
+            var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
+            var printStr = "<div class='list-group-item list-group-item-success'>" + label + msg + "</div>";
+
+            $("#log").append(printStr);
             Control.scroll();
         };
 
@@ -67,6 +81,7 @@ var Compiler;
                 scrollTop: $("#log")[0].scrollHeight
             }, 50);
         };
+        Control.isVerbose = true;
         return Control;
     })();
     Compiler.Control = Control;

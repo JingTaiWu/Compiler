@@ -81,7 +81,7 @@ var Compiler;
                 }
             }
 
-            this.stdOut("EOF reached. No LEX errors found.");
+            Compiler.Control.stdNVOut("LEXER", "EOF reached. No LEX errors found.");
             return true;
         };
 

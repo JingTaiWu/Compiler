@@ -5,6 +5,7 @@
 */
 module Compiler {
     export class Control {
+        public static isVerbose: boolean = true;
         // Initializes UI elements
         public static init() {
             // clear all the panels
@@ -21,12 +22,15 @@ module Compiler {
 
         // For standard log output
         public static stdOut(src: string, msg: string): void {
+            if(!Control.isVerbose) {
+                return;
+            }
             //var icon = "<span class='glyphicon glyphicon-circle-arrow-right'></span>&nbsp";
             var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
             var printStr = "<div class='list-group-item list-group-item-info'>" + label + msg + "</div>";
 
             $("#log").append(printStr);
-            Control.scroll();
+            //Control.scroll();
         }
 
         // For standard error output
@@ -36,6 +40,16 @@ module Compiler {
             var errStr = "<div class='list-group-item list-group-item-danger'>" + label + msg + "</div>";
 
             $("#log").append(errStr);
+            Control.scroll();
+        }
+
+        // For non verbose output
+        public static stdNVOut(src: string, msg: string): void {
+            //var icon = "<span class='glyphicon glyphicon-circle-arrow-right'></span>&nbsp";
+            var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
+            var printStr = "<div class='list-group-item list-group-item-success'>" + label + msg + "</div>";
+
+            $("#log").append(printStr);
             Control.scroll();
         }
 
