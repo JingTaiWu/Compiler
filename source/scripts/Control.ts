@@ -53,6 +53,15 @@ module Compiler {
             Control.scroll();
         }
 
+        // For issuing warnings
+        public static stdWarn(src: string, msg: string): void {
+            var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
+            var printStr = "<div class='list-group-item list-group-item-warning'>" + label + msg + "</div>";
+
+            $("#log").append(printStr);
+            Control.scroll();
+        }
+
         // For displaying all the tokens
         public static displayToken(src: Token[]): void {
             // Display all the tokens in the Tokens panel

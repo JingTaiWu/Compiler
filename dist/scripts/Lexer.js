@@ -29,6 +29,11 @@ var Compiler;
                 return;
             }
 
+            if (this.input.charAt(this.input.length - 1) != "$") {
+                this.stdWarn("Did not detect EOF at the end of the code, appending EOF.");
+                this.input += "$";
+            }
+
             this.stdOut("Processing the code...");
 
             // Separate the input line by line
@@ -67,6 +72,15 @@ var Compiler;
                                             return false;
                                         }
                                     }
+                                } else if (result.getKind() == "EOF_TOKEN") {
+                                    this.tokens.push(result);
+
+                                    // If the token is end of file and there are more things to come
+                                    // issue a warning.
+                                    if (lineNumber < lines.length - 1 || i < words.length - 1) {
+                                        this.stdWarn("EOF Token detected and there are more code. The rest of the code would be ignored.");
+                                    }
+                                    return true;
                                 } else {
                                     this.tokens.push(result);
                                 }
@@ -96,7 +110,7 @@ var Compiler;
             var character = /^[a-z]$/;
 
             // Digit
-            var digit = /^[0-9]*$/;
+            var digit = /^[0-9]$/;
 
             // Boolop
             var boolop = /^((==)|(!=))$/;
@@ -201,6 +215,10 @@ var Compiler;
 
         Lexer.prototype.stdErr = function (msg) {
             Compiler.Control.stdErr("LEXER", msg);
+        };
+
+        Lexer.prototype.stdWarn = function (msg) {
+            Compiler.Control.stdWarn("LEXER", msg);
         };
 
         Lexer.prototype.getTokens = function () {

@@ -233,7 +233,7 @@ module Compiler {
         // getNextToken - return the token at current index and increment the index
         public getNextToken(): Token {
             // Assume the current token is EOF
-            var thisToken = new Token("EOF_TOKEN", "$", 0);
+            var thisToken = new Token("", "", 0);
             if(this.index < this.tokenStream.length) {
                 thisToken = this.tokenStream[this.index];
                 //this.stdOut("Current Token: " + thisToken.getValue() + ". Token Kind: " + thisToken.getKind() + ".");
@@ -246,7 +246,7 @@ module Compiler {
         // peek - returns the next token
         public peek(): Token {
             var nextIndex = this.index + 1;
-            var thisToken = new Token("EOF_TOKEN", "$", 0);
+            var thisToken = new Token("", "", 0);
             if(nextIndex < this.tokenStream.length) {
                 thisToken = this.tokenStream[nextIndex];
             }

@@ -223,7 +223,7 @@ var Compiler;
         // getNextToken - return the token at current index and increment the index
         Parser.prototype.getNextToken = function () {
             // Assume the current token is EOF
-            var thisToken = new Compiler.Token("EOF_TOKEN", "$", 0);
+            var thisToken = new Compiler.Token("", "", 0);
             if (this.index < this.tokenStream.length) {
                 thisToken = this.tokenStream[this.index];
 
@@ -237,7 +237,7 @@ var Compiler;
         // peek - returns the next token
         Parser.prototype.peek = function () {
             var nextIndex = this.index + 1;
-            var thisToken = new Compiler.Token("EOF_TOKEN", "$", 0);
+            var thisToken = new Compiler.Token("", "", 0);
             if (nextIndex < this.tokenStream.length) {
                 thisToken = this.tokenStream[nextIndex];
             }

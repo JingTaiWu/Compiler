@@ -56,6 +56,15 @@ var Compiler;
             Control.scroll();
         };
 
+        // For issuing warnings
+        Control.stdWarn = function (src, msg) {
+            var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
+            var printStr = "<div class='list-group-item list-group-item-warning'>" + label + msg + "</div>";
+
+            $("#log").append(printStr);
+            Control.scroll();
+        };
+
         // For displaying all the tokens
         Control.displayToken = function (src) {
             for (var j = 0; j < src.length; j++) {
