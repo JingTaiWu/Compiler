@@ -22,11 +22,10 @@ var Compiler;
 
             // RegEx for delimiter
             // var DELIMITER = /([a-z]+)|(\d+)|(")|(==)|(!=)|(\S)/g;
-            var DELIMITER = /([a-z]+)|(\d+)|("[^"]*")|(==)|(!=)|(\S)/g;
+            var DELIMITER = /([a-z]+)|(\d)|("[^"]*")|(==)|(!=)|(\S)/g;
 
             if (this.input == "") {
-                this.stdErr("Please put some code in.");
-                return;
+                throw "Please put some code in.";
             }
 
             if (this.input.charAt(this.input.length - 1) != "$") {
@@ -86,9 +85,8 @@ var Compiler;
                                 }
                             } else {
                                 // If not, throw an error
-                                this.stdErr("Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
-                                this.stdErr("Terminated.");
-                                return false;
+                                var errStr = "Invalid Token: <strong>" + word + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.";
+                                throw errStr;
                             }
                         }
                     }
@@ -211,10 +209,6 @@ var Compiler;
         // }
         Lexer.prototype.stdOut = function (msg) {
             Compiler.Control.stdOut("LEXER", msg);
-        };
-
-        Lexer.prototype.stdErr = function (msg) {
-            Compiler.Control.stdErr("LEXER", msg);
         };
 
         Lexer.prototype.stdWarn = function (msg) {

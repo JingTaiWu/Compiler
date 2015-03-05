@@ -5,13 +5,17 @@
 */
 module Compiler {
     export class Control {
-        public static isVerbose: boolean = true;
-        public static passLexer: boolean = false;
-        public static passParser: boolean = false;
+        public static isVerbose: boolean;
+        public static passLexer: boolean;
+        public static passParser: boolean;
         // Initializes UI elements
         public static init() {
             // clear all the panels
             $("#log, #tokenTable > tbody:last").empty();
+            // Initialize state variables
+            this.isVerbose = true;
+            this.passLexer = false;
+            this.passParser = false;
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
             LEXER = new Compiler.Lexer(input);
@@ -19,6 +23,7 @@ module Compiler {
             try {
                 this.passLexer = LEXER.toTokens();
                 this.stdNVOut("LEXER", "Lexer found no errors.");
+                this.displayToken(LEXER.getTokens());
             } catch(e) {
                 this.stdErr("LEXER", e);
             }
