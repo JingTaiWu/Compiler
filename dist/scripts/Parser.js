@@ -19,11 +19,12 @@ var Compiler;
 
             // Program is our ultimate production
             this.parseProgram();
-            if (this.errorCount == 0) {
-                Compiler.Control.stdNVOut("PARSER", "Parsing Success. Found 0 errors.");
-            } else {
-                this.stdErr("Parsing Failed. Found " + this.errorCount + " error.");
-            }
+            return true;
+            // if(this.errorCount == 0) {
+            //     Control.stdNVOut("PARSER", "Parsing Success. Found 0 errors.");
+            // } else {
+            //     this.stdErr("Parsing Failed. Found " + this.errorCount + " error.");
+            // }
         };
 
         // parseProgram - Program ::== Block $
@@ -214,9 +215,9 @@ var Compiler;
                 this.currentToken = this.getNextToken();
                 return true;
             } else {
-                this.stdErr("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue() + ". On line " + this.currentToken.getLineNumber());
+                var errStr = "Expecting <strong>" + expectedKind + "</strong>. Found <strong>" + this.currentToken.getValue() + "</strong>. On line " + this.currentToken.getLineNumber();
                 this.errorCount++;
-                return false;
+                throw errStr;
             }
         };
 
@@ -247,10 +248,6 @@ var Compiler;
 
         Parser.prototype.stdOut = function (msg) {
             Compiler.Control.stdOut("PARSER", msg);
-        };
-
-        Parser.prototype.stdErr = function (msg) {
-            Compiler.Control.stdErr("PARSER", msg);
         };
         return Parser;
     })();

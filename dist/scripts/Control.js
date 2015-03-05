@@ -15,10 +15,22 @@ var Compiler;
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
             LEXER = new Compiler.Lexer(input);
-            if (LEXER.toTokens()) {
-                this.displayToken(LEXER.getTokens());
-                PARSER = new Compiler.Parser(LEXER.getTokens());
-                PARSER.parse();
+
+            try  {
+                this.passLexer = LEXER.toTokens();
+                this.stdNVOut("LEXER", "Lexer found no errors.");
+            } catch (e) {
+                this.stdErr("LEXER", e);
+            }
+
+            if (this.passLexer) {
+                try  {
+                    PARSER = new Compiler.Parser(LEXER.getTokens());
+                    this.passParser = PARSER.parse();
+                    this.stdNVOut("PARSER", "Parser found no errors");
+                } catch (e) {
+                    this.stdErr("PARSER", e);
+                }
             }
         };
 
@@ -91,6 +103,8 @@ var Compiler;
             }, 50);
         };
         Control.isVerbose = true;
+        Control.passLexer = false;
+        Control.passParser = false;
         return Control;
     })();
     Compiler.Control = Control;

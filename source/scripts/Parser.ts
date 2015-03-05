@@ -18,17 +18,18 @@ module Compiler {
         }
 
         // parse - The beginning step of parsing
-        public parse(): void {
+        public parse(): boolean {
             // Grab the next token
             this.currentToken = this.getNextToken();
             this.stdOut("Begin Parsing...");
             // Program is our ultimate production
             this.parseProgram();
-            if(this.errorCount == 0) {
-                Control.stdNVOut("PARSER", "Parsing Success. Found 0 errors.");
-            } else {
-                this.stdErr("Parsing Failed. Found " + this.errorCount + " error.");
-            }
+            return true;
+            // if(this.errorCount == 0) {
+            //     Control.stdNVOut("PARSER", "Parsing Success. Found 0 errors.");
+            // } else {
+            //     this.stdErr("Parsing Failed. Found " + this.errorCount + " error.");
+            // }
         }
 
         // parseProgram - Program ::== Block $
@@ -224,9 +225,10 @@ module Compiler {
                 this.currentToken = this.getNextToken();
                 return true;
             } else {
-                this.stdErr("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue() + ". On line " + this.currentToken.getLineNumber());
+                var errStr = "Expecting <strong>" + expectedKind + "</strong>. Found <strong>" + this.currentToken.getValue() 
+                              + "</strong>. On line " + this.currentToken.getLineNumber();
                 this.errorCount++;
-                return false;
+                throw errStr;
             }
         }
 
@@ -256,10 +258,6 @@ module Compiler {
 
         public stdOut(msg: string): void {
             Control.stdOut("PARSER", msg);
-        }
-
-        public stdErr(msg: string): void {
-            Control.stdErr("PARSER", msg);
         }
     }
 }

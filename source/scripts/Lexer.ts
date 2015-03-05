@@ -73,8 +73,8 @@ module Compiler {
                                         } else if(character.test(curChar)) {
                                             this.tokens.push(new Token("CHARACTER_TOKEN", curChar, lineNumber + 1));
                                         } else {
-                                            this.stdErr("Invalid String Character: <strong>" + curChar + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.");
-                                            return false;
+                                            var errStr = "Invalid String Character: <strong>" + curChar + "</strong> on line <strong>" + (lineNumber + 1) + "</strong>.";
+                                            throw errStr;
                                         }
                                     }
                                 } else if(result.getKind() == "EOF_TOKEN") {
@@ -82,7 +82,7 @@ module Compiler {
                                     // If the token is end of file and there are more things to come
                                     // issue a warning.
                                     if(lineNumber < lines.length - 1 || i < words.length - 1) {
-                                        this.stdWarn("EOF Token detected and there are more code. The rest of the code would be ignored.");
+                                        this.stdWarn("EOF Token detected and there are more code. The rest of the code will be ignored.");
                                     }
                                     return true;
                                 } else {
@@ -99,7 +99,7 @@ module Compiler {
                 }
             }
 
-            Control.stdNVOut("LEXER", "EOF reached. No LEX errors found.");
+            Control.stdNVOut("LEXER", "No LEX errors found.");
             return true;
         }
 
