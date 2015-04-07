@@ -14,11 +14,15 @@
         <script type="text/javascript" src="resources/jquery-linedtextarea.js"></script>
 
         <!-- Compiler Essentials -->
+        <script type="text/javascript" src="dist/scripts/Node.js"></script>
         <script type="text/javascript" src="dist/scripts/Token.js"></script>     
         <script type="text/javascript" src="dist/scripts/Lexer.js"></script>
         <script type="text/javascript" src="dist/scripts/Parser.js"></script>
         <script type="text/javascript" src="dist/scripts/Control.js"></script>
 
+        <!-- UI control -->
+        <script type="text/javascript" src="dist/scripts/UIControl.js"></script>
+        
         <!-- CSS files -->
         <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="dist/styles/style.css" />
@@ -29,12 +33,14 @@
         <!-- Navigation bar -->
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
+                <!-- Logo -->
                 <div class="navbar-header">
                     <space class="navbar-brand" id="brand">
                         <span class="glyphicon glyphicon-bell" style="color:gold;"></span>
                         Jing-Piler
                     </h1>
                 </div>
+                <!-- Compile Button -->
                 <div class="btn-group nav navbar-right">
                     <div>
                         <button type="button" class="btn btn-default navbar-btn btn-success" id="compile">
@@ -51,8 +57,22 @@
         <!-- Main Container -->
         <div id="divMain" class="container theme-showcase" role="main">
             <div class="row">
-                <!-- Code Input Box -->
                 <div class="col-md-6">
+                    <!-- Example Programs -->
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownmenu">
+                            Example Code
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownmenu">
+                            <li><a href="#" id="example_1">Example 1</a></li>
+                            <li><a href="#" id="example_2">Example 2</a></li>
+                            <li><a href="#" id="example_3">Example 3</a></li>
+                            <li><a href="#" id="example_4">Example 4</a></li>
+                        </ul>
+                    </div>
+                    <br>
+                    <!-- Code Input Box -->
                     <textarea id="codeInput"></textarea>
                 </div>
 
@@ -96,7 +116,7 @@
             </div>
 
             <div class="row">
-                <img src="dist/styles/Doge.jpg" />
+                <!--<img src="dist/styles/Doge.jpg" />-->
             </div>
         </div>
     </body>
@@ -104,16 +124,5 @@
     <!-- LinedTextArea -->
     <script>
         $("#codeInput").linedtextarea();
-        $("#compile").click(function() {
-            Compiler.Control.init();
-        })
-        $("#verboseBtn").click(function(){
-            Compiler.Control.isVerbose = !Compiler.Control.isVerbose
-            if(Compiler.Control.isVerbose) {
-                $("#verboseBtn").text("Verbose On");
-            } else {
-                $("#verboseBtn").text("Verbose Off");
-            }
-        });
     </script>
 </html>

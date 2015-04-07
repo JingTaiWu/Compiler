@@ -25,11 +25,6 @@ module Compiler {
             // Program is our ultimate production
             this.parseProgram();
             return true;
-            // if(this.errorCount == 0) {
-            //     Control.stdNVOut("PARSER", "Parsing Success. Found 0 errors.");
-            // } else {
-            //     this.stdErr("Parsing Failed. Found " + this.errorCount + " error.");
-            // }
         }
 
         // parseProgram - Program ::== Block $
@@ -65,13 +60,6 @@ module Compiler {
             } else {
                 // Epsilon
             }
-
-            // if(this.currentToken.getKind() != "EOF_TOKEN") {
-            //     this.parseStatement();
-            //     this.parseStatementList();
-            // } else {
-            //     // Epsilon
-            // }
         }
 
         // parseStatement - Statement ::== PrintStatement

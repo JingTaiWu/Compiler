@@ -10,6 +10,7 @@ module Compiler {
         private value: string;
         // lineNumber - The line number in which the token was found
         private lineNumber: number;
+        
         constructor(kind: string, value: string, lineNumber: number) {
             this.kind = kind;
             this.value = value;

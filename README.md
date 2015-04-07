@@ -2,6 +2,7 @@
 ==============
 
 Part 1 (Lexer and parser)
+-------------------------
 
 Write a complete lexer and parser that validates the source code for Our Language Grammar
 
@@ -18,3 +19,14 @@ Write a complete lexer and parser that validates the source code for Our Languag
 6. If there are errors in parse, do not show the CST.
 
 7. Include verbose output functionality that traces the stages of the parser inlcuding the consturction of the symbol table.
+
+Part 2 (Semantic Analysis)
+--------------------------
+
+1. Fix any deficiencies with your lexer and parser from Project One.
+
+2. Modify your parser to create a concrete syntax tree while parsing. Display the CST as well. Make it neat, if not also pretty.
+
+3. Write a semantic analyzer that scope-checks and type-checks the CST for the [Our Language Grammar](http://www.labouseur.com/courses/compilers/grammar.pdf)
+    a. Create and display a symbol table with type and scope information.
+    b. Create and siaply the abstract syntax tree(AST).
