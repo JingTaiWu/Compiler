@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Compiler</title>
-        <link rel="author" content="Jing Tai Wu">
 
         <!--Bootstrap Essentials -->
         <script type="text/javascript" src="bootstrap/jquery-1.11.1.min.js"></script>
@@ -35,17 +34,17 @@
             <div class="container">
                 <!-- Logo -->
                 <div class="navbar-header">
-                    <space class="navbar-brand" id="brand">
+                    <span class="navbar-brand" id="brand">
                         <span class="glyphicon glyphicon-bell" style="color:gold;"></span>
                         Jing-Piler
-                    </h1>
+                    </span>
                 </div>
                 <!-- Compile Button -->
                 <div class="btn-group nav navbar-right">
                     <div>
                         <button type="button" class="btn btn-default navbar-btn btn-success" id="compile">
                             Compile
-                            &nbsp
+                            &nbsp;
                             <span class="glyphicon glyphicon-play"></span>
                         </button>
                         <button type="button" class="btn btn-default navbar-btn" id="verboseBtn">Verbose On</button>
@@ -55,28 +54,33 @@
         </nav>
 
         <!-- Main Container -->
-        <div id="divMain" class="container theme-showcase" role="main">
+        <div id="divMain" class="container-fluid" role="main">
             <div class="row">
-                <div class="col-md-6">
-                    <!-- Example Programs -->
-                    <div class="dropdown">
-                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownmenu">
-                            Example Code
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownmenu">
-                            <li><a href="#" id="example_1">Example 1</a></li>
-                            <li><a href="#" id="example_2">Example 2</a></li>
-                            <li><a href="#" id="example_3">Example 3</a></li>
-                            <!-- <li><a href="#" id="example_4">Example 4</a></li> -->
-                        </ul>
+                <div class="col-md-3 col-md-offset-1">
+                    <div class="panel panel-default" id="codeInputPanel">
+                        <div class="panel-heading">
+                            <!-- Example Programs -->
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownmenu">
+                                    Example Code
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownmenu">
+                                    <li><a href="#" id="example_1">Example 1</a></li>
+                                    <li><a href="#" id="example_2">Example 2</a></li>
+                                    <li><a href="#" id="example_3">Example 3</a></li>
+                                    <!-- <li><a href="#" id="example_4">Example 4</a></li> -->
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <!-- Code Input Box -->
+                            <textarea id="codeInput"></textarea>
+                        </div>
                     </div>
-                    <br>
-                    <!-- Code Input Box -->
-                    <textarea id="codeInput"></textarea>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="row">
                         <!-- Log-->
                         <div class="panel panel-default">
@@ -86,7 +90,9 @@
                             <div class="panel-body" id="log"></div>
                         </div>
                     </div>
+                </div>
 
+                <div class="col-md-3">
                     <!-- Tokens -->
                     <div class="row">
                         <div class="panel panel-default" id="tokenPanel">
@@ -111,21 +117,18 @@
                             </table>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            <br>
+            <!-- Tree Display -->
             <div class="row">
-                <div class="col-md-offset-4">
-                    <img src="dist/styles/Doge.jpg" style="width: 300px"/>
-                </div>
+                
             </div>
         </div>
-    </body>
 
-    <!-- LinedTextArea -->
-    <script>
-        $("#codeInput").linedtextarea();
-    </script>
+        <!-- LinedTextArea -->
+        <script>
+            $("#codeInput").linedtextarea();
+        </script>
+    </body>
 </html>

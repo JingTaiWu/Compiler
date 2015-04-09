@@ -15,12 +15,12 @@ body {
 
 #log {
     font-size: 13px;
-    height: 200px;
+    height: 400px;
     overflow-y: auto;
 }
 
 #tokenPanel {
-    height: 120px;
+    height: 200px;
     overflow-y: auto;
 }
 
