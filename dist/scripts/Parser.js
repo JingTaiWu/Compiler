@@ -233,7 +233,7 @@ var Compiler;
             //this.stdOut("Current Index " + this.index);
             if (this.currentToken.getKind() == expectedKind) {
                 this.stdOut("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue());
-                this.CST.addNode(new Compiler.Node(this.currentToken.getKind()), "LEAF");
+                this.CST.addNode(new Compiler.Node(this.currentToken.getValue()), "LEAF");
                 this.currentToken = this.getNextToken();
                 return true;
             } else {

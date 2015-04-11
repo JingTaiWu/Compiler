@@ -34,6 +34,7 @@ var Compiler;
                     PARSER = new Compiler.Parser(LEXER.getTokens());
                     this.passParser = PARSER.parse();
                     this.stdNVOut("PARSER", "Parser found no errors");
+                    CST = PARSER.getCST();
                     this.displayTree(PARSER.getCST());
                 } catch (e) {
                     this.stdErr("PARSER", e);
