@@ -37,7 +37,7 @@ module Compiler {
             this.CST.addNode(new Node("Program"), "BRANCH");
             this.parseBlock();
             this.checkToken("EOF_TOKEN");
-            this.CST.returnToParent();
+            //this.CST.returnToParent();
         }
 
         // parseBlock - Block ::== {StatementList}
@@ -243,7 +243,6 @@ module Compiler {
             if(this.currentToken.getKind() == expectedKind) {
                 this.stdOut("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue());
                 this.CST.addNode(new Node(this.currentToken.getKind()), "LEAF");
-                this.CST.returnToParent();
                 this.currentToken = this.getNextToken();
                 return true;
             } else {

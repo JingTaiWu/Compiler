@@ -32,7 +32,7 @@ var Compiler;
             this.CST.addNode(new Compiler.Node("Program"), "BRANCH");
             this.parseBlock();
             this.checkToken("EOF_TOKEN");
-            this.CST.returnToParent();
+            //this.CST.returnToParent();
         };
 
         // parseBlock - Block ::== {StatementList}
@@ -234,7 +234,6 @@ var Compiler;
             if (this.currentToken.getKind() == expectedKind) {
                 this.stdOut("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue());
                 this.CST.addNode(new Compiler.Node(this.currentToken.getKind()), "LEAF");
-                this.CST.returnToParent();
                 this.currentToken = this.getNextToken();
                 return true;
             } else {

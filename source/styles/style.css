@@ -7,10 +7,17 @@ body {
 #divMain {
 }
 
-#codeInput {
-    height: 350px;
+textarea {
     width: 100%;
     resize: none;
+}
+
+#codeInput {
+    height: 350px;
+}
+
+#CSTDisplay {
+    height: 250px;
 }
 
 #log {
