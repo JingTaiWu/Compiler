@@ -233,7 +233,7 @@ var Compiler;
             //this.stdOut("Current Index " + this.index);
             if (this.currentToken.getKind() == expectedKind) {
                 this.stdOut("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue());
-                this.CST.addNode(new Compiler.Node(this.currentToken.getKind()), "BRANCH");
+                this.CST.addNode(new Compiler.Node(this.currentToken.getKind()), "LEAF");
                 this.CST.returnToParent();
                 this.currentToken = this.getNextToken();
                 return true;
@@ -271,6 +271,10 @@ var Compiler;
 
         Parser.prototype.stdOut = function (msg) {
             Compiler.Control.stdOut("PARSER", msg);
+        };
+
+        Parser.prototype.getCST = function () {
+            return this.CST;
         };
         return Parser;
     })();

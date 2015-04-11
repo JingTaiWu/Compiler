@@ -242,7 +242,7 @@ module Compiler {
             //this.stdOut("Current Index " + this.index);
             if(this.currentToken.getKind() == expectedKind) {
                 this.stdOut("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue());
-                this.CST.addNode(new Node(this.currentToken.getKind()), "BRANCH");
+                this.CST.addNode(new Node(this.currentToken.getKind()), "LEAF");
                 this.CST.returnToParent();
                 this.currentToken = this.getNextToken();
                 return true;
@@ -280,6 +280,10 @@ module Compiler {
 
         public stdOut(msg: string): void {
             Control.stdOut("PARSER", msg);
+        }
+
+        public getCST(): Tree {
+            return this.CST;
         }
     }
 }

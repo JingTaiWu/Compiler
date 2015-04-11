@@ -33,6 +33,7 @@ module Compiler {
                     PARSER = new Compiler.Parser(LEXER.getTokens());
                     this.passParser = PARSER.parse();
                     this.stdNVOut("PARSER", "Parser found no errors");
+                    this.displayTree(PARSER.getCST());
                 } catch(e) {
                     this.stdErr("PARSER", e);
                 }
@@ -97,6 +98,11 @@ module Compiler {
                     scrollTop: $("#tokenPanel")[0].scrollHeight
                 }, 200);
             }
+        }
+
+        // For tree display
+        public static displayTree(src: Tree): void {
+            $("#CSTDisplay").text(src.toString());
         }
 
         // For log scrolling
