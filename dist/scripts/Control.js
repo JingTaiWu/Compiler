@@ -106,7 +106,33 @@ var Compiler;
 
         // For tree display
         Control.displayTree = function (src) {
-            $("#CSTDisplay").text(src.toString());
+            // recursive function to traverse the tree
+            function expand(node, depth) {
+                for (var i = 0; i < depth; i++) {
+                    var icon = "<span class='glyphicon glyphicon-minus'></span>";
+                    $("#CSTDisplay").append(icon);
+                }
+
+                var children = node.getChildren();
+
+                // If there are no children
+                if (!children || children.length == 0) {
+                    // append the name of the leaf node to the string
+                    var label = "<span class='label label-success'>" + node.getName() + "</span>";
+                    $("#CSTDisplay").append(label + "<br>");
+                } else {
+                    var label = "<span class='label label-info'>" + node.getName() + "</span>";
+
+                    // If there are children, expand each one
+                    $("#CSTDisplay").append(label + "<br>");
+                    for (var j = 0; j < children.length; j++) {
+                        expand(node.getChildren()[j], depth + 1);
+                    }
+                }
+            }
+
+            // Call the recursive function
+            expand(src.getRootNode(), 0);
         };
 
         // For log scrolling
