@@ -110,7 +110,7 @@ module Compiler {
 
         // For tree display
         public static displayTree(src, type): void {
-            var displayDiv = (type == "CST") ? "#CSTDisplay" : "ASTDisplay"
+            var displayDiv = (type == "CST") ? "#CSTDisplay" : "#ASTDisplay"
             // clear the div first
             $(displayDiv).empty();
             // recursive function to traverse the tree
@@ -121,7 +121,10 @@ module Compiler {
                     $(displayDiv).append(icon);
                 }
 
-                var children = node.getChildren();
+                
+                if(node) {
+                    var children = node.getChildren();
+                }
                 // If there are no children
                 if(!children || children.length == 0) {
                     // append the name of the leaf node to the string

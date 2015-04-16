@@ -13,7 +13,7 @@ module Compiler {
         constructor(CST: ConcreteSyntaxTree) {
             this.CST = CST;
             this.AST = new AbstractSyntaxTree(this.CST);
-            this.AST.convert(null, this.CST.getRootNode());
+            this.AST.convert(this.CST.getRootNode());
         }
 
         public getAST(): AbstractSyntaxTree {

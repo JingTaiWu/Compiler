@@ -113,7 +113,7 @@ var Compiler;
 
         // For tree display
         Control.displayTree = function (src, type) {
-            var displayDiv = (type == "CST") ? "#CSTDisplay" : "ASTDisplay";
+            var displayDiv = (type == "CST") ? "#CSTDisplay" : "#ASTDisplay";
 
             // clear the div first
             $(displayDiv).empty();
@@ -125,7 +125,9 @@ var Compiler;
                     $(displayDiv).append(icon);
                 }
 
-                var children = node.getChildren();
+                if (node) {
+                    var children = node.getChildren();
+                }
 
                 // If there are no children
                 if (!children || children.length == 0) {

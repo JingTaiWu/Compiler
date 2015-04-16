@@ -7,6 +7,7 @@ module Compiler {
         private parentNode: Node;
         private name: string;
         private lineNumber: number;
+        public isChar: boolean = false;
 
         constructor(name: string) {
             this.children = [];

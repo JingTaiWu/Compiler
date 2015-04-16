@@ -239,6 +239,9 @@ var Compiler;
                 this.stdOut("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue());
                 var newNode = new Compiler.Node(this.currentToken.getValue());
                 newNode.setLineNumber(this.currentToken.getLineNumber());
+                if (this.currentToken.getKind() == "CHARACTER_TOKEN" || this.currentToken.getKind() == "SPACE_TOKEN") {
+                    newNode.isChar = true;
+                }
                 this.CST.addNode(newNode, "LEAF");
                 this.currentToken = this.getNextToken();
                 return true;
