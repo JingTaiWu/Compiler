@@ -1,3 +1,7 @@
+/// <reference path="ConcreteSyntaxTree.ts"/>
+/// <reference path="Token.ts"/>
+/// <reference path="Node.ts"/>
+/// <reference path="Control.ts"/>
 /*
     Parser - LL1 (Left most derivation with one token look ahead)
     Grammar for parsing: http://www.labouseur.com/courses/compilers/grammar.pdf
@@ -9,14 +13,14 @@ module Compiler {
         private index: number;
         private currentToken: Token;
         private errorCount: number;
-        private CST: Tree; //Concrete Syntax Tree
+        private CST: ConcreteSyntaxTree; //Concrete Syntax Tree
 
         // Constructor - Takes in a token stream
         constructor(tokenStream: Token[]) {
             this.tokenStream = tokenStream;
             this.index = 0;
             this.errorCount = 0;
-            this.CST = new Tree();
+            this.CST = new ConcreteSyntaxTree();
         }
 
         // parse - The beginning step of parsing
@@ -242,7 +246,9 @@ module Compiler {
             //this.stdOut("Current Index " + this.index);
             if(this.currentToken.getKind() == expectedKind) {
                 this.stdOut("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue());
-                this.CST.addNode(new Node(this.currentToken.getValue()), "LEAF");
+                var newNode = new Node(this.currentToken.getValue());
+                newNode.setLineNumber(this.currentToken.getLineNumber());
+                this.CST.addNode(newNode, "LEAF");
                 this.currentToken = this.getNextToken();
                 return true;
             } else {
@@ -281,7 +287,7 @@ module Compiler {
             Control.stdOut("PARSER", msg);
         }
 
-        public getCST(): Tree {
+        public getCST(): ConcreteSyntaxTree {
             return this.CST;
         }
     }

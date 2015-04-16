@@ -1,4 +1,5 @@
 /// <reference path="jquery.d.ts"/>
+/// <reference path="globals.ts"/>
 /*
 This Class manages the UI elements on the webpage
 */
@@ -35,10 +36,16 @@ var Compiler;
                     this.passParser = PARSER.parse();
                     this.stdNVOut("PARSER", "Parser found no errors");
                     CST = PARSER.getCST();
-                    this.displayTree(PARSER.getCST());
+                    this.displayTree(PARSER.getCST(), "CST");
                 } catch (e) {
                     this.stdErr("PARSER", e);
                 }
+            }
+
+            if (this.passParser) {
+                SEMANTIC_ANALYZER = new Compiler.SemanticAnalysis(PARSER.getCST());
+                AST = SEMANTIC_ANALYZER.getAST();
+                this.displayTree(SEMANTIC_ANALYZER.getAST(), "AST");
             }
         };
 
@@ -105,12 +112,17 @@ var Compiler;
         };
 
         // For tree display
-        Control.displayTree = function (src) {
+        Control.displayTree = function (src, type) {
+            var displayDiv = (type == "CST") ? "#CSTDisplay" : "ASTDisplay";
+
+            // clear the div first
+            $(displayDiv).empty();
+
             // recursive function to traverse the tree
             function expand(node, depth) {
                 for (var i = 0; i < depth; i++) {
                     var icon = "<span class='glyphicon glyphicon-minus'></span>";
-                    $("#CSTDisplay").append(icon);
+                    $(displayDiv).append(icon);
                 }
 
                 var children = node.getChildren();
@@ -119,12 +131,12 @@ var Compiler;
                 if (!children || children.length == 0) {
                     // append the name of the leaf node to the string
                     var label = "<span class='label label-success'>" + node.getName() + "</span>";
-                    $("#CSTDisplay").append(label + "<br>");
+                    $(displayDiv).append(label + "<br>");
                 } else {
                     var label = "<span class='label label-info'>" + node.getName() + "</span>";
 
                     // If there are children, expand each one
-                    $("#CSTDisplay").append(label + "<br>");
+                    $(displayDiv).append(label + "<br>");
                     for (var j = 0; j < children.length; j++) {
                         expand(node.getChildren()[j], depth + 1);
                     }

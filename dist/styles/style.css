@@ -16,10 +16,14 @@ textarea {
     height: 350px;
 }
 
+#CSTDisplayPanel {
+    
+}
 #CSTDisplay {
     font-size: 16px;
     height: 300px;
-    overflow-y: auto;
+    white-space: nowrap;
+    overflow: auto;
 }
 
 #log {

@@ -1,3 +1,7 @@
+/// <reference path="ConcreteSyntaxTree.ts"/>
+/// <reference path="Token.ts"/>
+/// <reference path="Node.ts"/>
+/// <reference path="Control.ts"/>
 /*
 Parser - LL1 (Left most derivation with one token look ahead)
 Grammar for parsing: http://www.labouseur.com/courses/compilers/grammar.pdf
@@ -10,7 +14,7 @@ var Compiler;
             this.tokenStream = tokenStream;
             this.index = 0;
             this.errorCount = 0;
-            this.CST = new Compiler.Tree();
+            this.CST = new Compiler.ConcreteSyntaxTree();
         }
         // parse - The beginning step of parsing
         Parser.prototype.parse = function () {
@@ -233,7 +237,9 @@ var Compiler;
             //this.stdOut("Current Index " + this.index);
             if (this.currentToken.getKind() == expectedKind) {
                 this.stdOut("Expecting <strong>" + expectedKind + "</strong>. Found " + this.currentToken.getValue());
-                this.CST.addNode(new Compiler.Node(this.currentToken.getValue()), "LEAF");
+                var newNode = new Compiler.Node(this.currentToken.getValue());
+                newNode.setLineNumber(this.currentToken.getLineNumber());
+                this.CST.addNode(newNode, "LEAF");
                 this.currentToken = this.getNextToken();
                 return true;
             } else {

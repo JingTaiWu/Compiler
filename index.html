@@ -14,10 +14,12 @@
 
         <!-- Compiler Essentials -->
         <script type="text/javascript" src="dist/scripts/Node.js"></script>
-        <script type="text/javascript" src="dist/scripts/Tree.js"></script>
+        <script type="text/javascript" src="dist/scripts/ConcreteSyntaxTree.js"></script>
+        <script type="text/javascript" src="dist/scripts/AbstractSyntaxTree.js"></script>
         <script type="text/javascript" src="dist/scripts/Token.js"></script>     
         <script type="text/javascript" src="dist/scripts/Lexer.js"></script>
         <script type="text/javascript" src="dist/scripts/Parser.js"></script>
+        <script type="text/javascript" src="dist/scripts/SemanticAnalysis.js"></script>
         <script type="text/javascript" src="dist/scripts/Control.js"></script>
 
         <!-- UI control -->
@@ -127,7 +129,9 @@
                         <div class="panel-heading">
                             <strong>Concrete Syntax Tree</strong>
                         </div>
-                        <div class="panel-body" id="CSTDisplay">
+                        <div class="panel-body">
+                            <div id="CSTDisplay">
+                            </div>
                         </div>
                     </div>
                 </div>

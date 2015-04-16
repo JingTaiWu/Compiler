@@ -1,4 +1,6 @@
 /// <reference path="jquery.d.ts"/>
+/// <reference path="Token.ts"/>
+/// <reference path="Control.ts"/>
 /*
 Lexer/Scanner - First part of the compiler. Lexer reads the code character by character and creates token
 */
