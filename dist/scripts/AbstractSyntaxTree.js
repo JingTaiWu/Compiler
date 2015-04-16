@@ -5,8 +5,10 @@ Abstract Syntax Tree - building from concrete syntax tree
 var Compiler;
 (function (Compiler) {
     var AbstractSyntaxTree = (function () {
-        function AbstractSyntaxTree(CST) {
-            this.CST = CST;
+        function AbstractSyntaxTree() {
+            // For string concatenation
+            this.buffering = false;
+            this.buffer = "";
         }
         // convert the CST to AST through traversing
         AbstractSyntaxTree.prototype.convert = function (node) {
@@ -55,7 +57,8 @@ var Compiler;
                     this.addNode(node.getChildren()[0], false);
                 }
             } else if (character.test(node.getName()) && node.isChar) {
-                this.addNode(node, false);
+                //this.addNode(node, false);
+                this.buffer += node.getName();
                 isBranch = false;
             } else if (node.getName() == "BooleanExpr") {
                 // Two cases for BooleanExpr
@@ -79,6 +82,16 @@ var Compiler;
                     newNode.setLineNumber(node.getLineNumber());
                     this.addNode(newNode, true);
                     isBranch = true;
+                }
+            } else if (node.getName() == "\"") {
+                // This step is to concat all the character tokens together
+                this.buffering = !this.buffering;
+                if (!this.buffering) {
+                    var newNode = new Compiler.Node(this.buffer);
+                    newNode.setLineNumber(node.getLineNumber());
+                    this.buffer = "";
+                    this.addNode(newNode, false);
+                    isBranch = false;
                 }
             }
 
@@ -121,37 +134,6 @@ var Compiler;
             } else {
                 console.log("This shouldn't really happen.");
             }
-        };
-
-        // Convert tree to a string
-        AbstractSyntaxTree.prototype.toString = function () {
-            var result = "";
-
-            // recursive function to traverse the tree
-            function expand(node, depth) {
-                for (var i = 0; i < depth; i++) {
-                    result += "-";
-                }
-
-                var children = node.getChildren();
-
-                // If there are no children
-                if (!children || children.length == 0) {
-                    // append the name of the leaf node to the string
-                    result += "[" + node.getName() + "]";
-                    result += "\n";
-                } else {
-                    // If there are children, expand each one
-                    result += "<" + node.getName() + "> \n";
-                    for (var j = 0; j < children.length; j++) {
-                        expand(node.getChildren()[j], depth + 1);
-                    }
-                }
-            }
-
-            // Call the recursive function
-            expand(this.root, 0);
-            return result;
         };
         return AbstractSyntaxTree;
     })();

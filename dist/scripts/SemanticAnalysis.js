@@ -11,7 +11,7 @@ var Compiler;
     var SemanticAnalysis = (function () {
         function SemanticAnalysis(CST) {
             this.CST = CST;
-            this.AST = new Compiler.AbstractSyntaxTree(this.CST);
+            this.AST = new Compiler.AbstractSyntaxTree();
             this.AST.convert(this.CST.getRootNode());
         }
         SemanticAnalysis.prototype.getAST = function () {
