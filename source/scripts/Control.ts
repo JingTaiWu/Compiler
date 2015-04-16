@@ -6,7 +6,6 @@
 */
 module Compiler {
     export class Control {
-        public static isVerbose: boolean;
         public static passLexer: boolean;
         public static passParser: boolean;
         // Initializes UI elements
@@ -14,7 +13,6 @@ module Compiler {
             // clear all the panels
             $("#log, #tokenTable > tbody:last").empty();
             // Initialize state variables
-            this.isVerbose = true;
             this.passLexer = false;
             this.passParser = false;
             // Obtain the code from the text area and pass it into the Lexer
@@ -50,7 +48,7 @@ module Compiler {
 
         // For standard log output
         public static stdOut(src: string, msg: string): void {
-            if(!Control.isVerbose) {
+            if(!isVerbose) {
                 return;
             }
             //var icon = "<span class='glyphicon glyphicon-circle-arrow-right'></span>&nbsp";

@@ -11,8 +11,8 @@ $(document).ready(function () {
 
     // Turns verbose mode on and off by toggling the verbose button.
     $("#verboseBtn").click(function () {
-        Compiler.Control.isVerbose = !Compiler.Control.isVerbose;
-        if (Compiler.Control.isVerbose) {
+        isVerbose = !isVerbose;
+        if (isVerbose) {
             $("#verboseBtn").text("Verbose On");
         } else {
             $("#verboseBtn").text("Verbose Off");

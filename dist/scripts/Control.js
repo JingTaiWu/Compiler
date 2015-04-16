@@ -14,7 +14,6 @@ var Compiler;
             $("#log, #tokenTable > tbody:last").empty();
 
             // Initialize state variables
-            this.isVerbose = true;
             this.passLexer = false;
             this.passParser = false;
 
@@ -51,7 +50,7 @@ var Compiler;
 
         // For standard log output
         Control.stdOut = function (src, msg) {
-            if (!Control.isVerbose) {
+            if (!isVerbose) {
                 return;
             }
 
