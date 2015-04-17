@@ -35,11 +35,11 @@ module Compiler {
             for(var key in src.members) {
                 var symbol: Symbol = src.members[key];
                 if(!symbol.isInitialized) {
-                    var str = "Variable <strong>[" + symbol.name + "]</strong> is never initialized.";
+                    var str = "Variable <strong>[" + symbol.name + "]</strong> in Scope [" + symbol.scopeNumber + "] is never initialized.";
                     Control.stdWarn("SEMANTIC_ANALYSIS", str);
                 }
                 if(!symbol.isUsed) {
-                    var str = "Variable <strong>[" + symbol.name + "]</strong> is never used.";
+                    var str = "Variable <strong>[" + symbol.name + "]</strong> in Scope [" + symbol.scopeNumber + "] is never used.";
                     Control.stdWarn("SEMANTIC_ANALYSIS", str);
                 }
             }

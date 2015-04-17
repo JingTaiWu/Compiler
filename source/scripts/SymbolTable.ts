@@ -187,15 +187,15 @@ module Compiler {
             }
 
             // Traverse the AST to create scope for each variable
-            if (node.getChildren().length != 0 || node.getChildren()) {
-                for (var i = 0; i < node.getChildren().length; i++) {
-                    this.create(node.getChildren()[i]);
-                }
+            for (var i = 0; i < node.getChildren().length; i++) {
+                this.create(node.getChildren()[i]);
             }
 
             //console.log("Exiting Scope " + this.currentNode.scopeNumber);
-            // Return to Parent after going through all the children
-            this.returnToParent();
+            // Exit scope if the node is a block
+            if(node.getName() == "Block") {
+                this.exitScope();
+            }
         }
 
         public findId(id: string): Symbol {
@@ -228,7 +228,7 @@ module Compiler {
             this.currentNode = scope;
         }
 
-        public returnToParent(): void {
+        public exitScope(): void {
             if(this.currentNode == this.root) {
                 return;
             }
