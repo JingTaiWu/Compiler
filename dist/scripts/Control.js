@@ -1,5 +1,7 @@
 /// <reference path="jquery.d.ts"/>
 /// <reference path="globals.ts"/>
+/// <reference path="Lexer.ts"/>
+/// <reference path="SemanticAnalysis.ts"/>
 /*
 This Class manages the UI elements on the webpage
 */
@@ -11,7 +13,7 @@ var Compiler;
         // Initializes UI elements
         Control.init = function () {
             // clear all the panels
-            $("#log, #tokenTable > tbody:last").empty();
+            $("#log, #tokenTable > tbody:last, #CSTDisplay, #ASTDisplay").empty();
 
             // Initialize state variables
             this.passLexer = false;
@@ -35,16 +37,23 @@ var Compiler;
                     this.passParser = PARSER.parse();
                     this.stdNVOut("PARSER", "Parser found no errors");
                     CST = PARSER.getCST();
-                    this.displayTree(PARSER.getCST(), "CST");
+                    this.displayTree(CST, "CST");
                 } catch (e) {
                     this.stdErr("PARSER", e);
                 }
             }
 
             if (this.passParser) {
-                SEMANTIC_ANALYZER = new Compiler.SemanticAnalysis(PARSER.getCST());
-                AST = SEMANTIC_ANALYZER.getAST();
-                this.displayTree(SEMANTIC_ANALYZER.getAST(), "AST");
+                try  {
+                    SEMANTIC_ANALYZER = new Compiler.SemanticAnalysis(PARSER.getCST());
+                    AST = SEMANTIC_ANALYZER.getAST();
+                    SEMANTIC_ANALYZER.createAST();
+                    SEMANTIC_ANALYZER.createSymbolTable();
+                    this.stdNVOut("SEMANTIC", "Semantic analyzer found no errors");
+                    this.displayTree(SEMANTIC_ANALYZER.getAST(), "AST");
+                } catch (e) {
+                    this.stdErr("SEMANTIC_ANALYSIS", e);
+                }
             }
         };
 

@@ -14,14 +14,20 @@ module Compiler {
         private SymbolTable: SymbolTable;
         constructor(CST: ConcreteSyntaxTree) {
             this.CST = CST;
-            this.AST = new AbstractSyntaxTree();
-            this.SymbolTable = new SymbolTable();
-            this.AST.convert(this.CST.getRootNode());
-            this.SymbolTable.create(this.AST.getRootNode());
         }
 
         public getAST(): AbstractSyntaxTree {
             return this.AST;
+        }
+
+        public createAST(): void {
+            this.AST = new AbstractSyntaxTree();
+            this.AST.convert(this.CST.getRootNode());
+        }
+
+        public createSymbolTable(): void {
+            this.SymbolTable = new SymbolTable();
+            this.SymbolTable.create(this.AST.getRootNode());
         }
     }
 }

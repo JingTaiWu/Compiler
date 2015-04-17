@@ -12,13 +12,19 @@ var Compiler;
     var SemanticAnalysis = (function () {
         function SemanticAnalysis(CST) {
             this.CST = CST;
-            this.AST = new Compiler.AbstractSyntaxTree();
-            this.SymbolTable = new Compiler.SymbolTable();
-            this.AST.convert(this.CST.getRootNode());
-            this.SymbolTable.create(this.AST.getRootNode());
         }
         SemanticAnalysis.prototype.getAST = function () {
             return this.AST;
+        };
+
+        SemanticAnalysis.prototype.createAST = function () {
+            this.AST = new Compiler.AbstractSyntaxTree();
+            this.AST.convert(this.CST.getRootNode());
+        };
+
+        SemanticAnalysis.prototype.createSymbolTable = function () {
+            this.SymbolTable = new Compiler.SymbolTable();
+            this.SymbolTable.create(this.AST.getRootNode());
         };
         return SemanticAnalysis;
     })();

@@ -18,7 +18,7 @@ module Compiler {
                 var newScope = new ScopeNode();
                 // Assign a new scope number
                 newScope.scopeNumber = ++this.scopeNum;
-                console.log("Block detected. " + this.scopeNum);
+                //console.log("Block detected. " + this.scopeNum);
                 this.addScope(newScope);
             }
             // If it is VarDecl, add the variable to the symbol table
@@ -33,13 +33,37 @@ module Compiler {
 
                 this.currentNode.addSymbol(symbol);
 
-                console.log("New Symbol: " + symbol.type + " " + symbol.name + " Scope: " + symbol.scopeNumber);
+                //console.log("New Symbol: " + symbol.type + " " + symbol.name + " Scope: " + symbol.scopeNumber);
+            }
+            // If it is AssignmentStatment, type check
+            if(node.getName() == "AssignmentStatement") {
+            	// Look up the type of the ID
+                var id = node.getChildren()[0].getName();
+                var idSymbol;
+                var curScope = this.currentNode;
+                while(curScope != null || curScope != undefined) {
+                	// Try to find it 
+                    idSymbol = curScope.getSymbol(id);
+                    if(idSymbol) {
+                    	// If it finds it, assign the result to the variable
+                    	// and break from the while loop
+                        break;
+                    } else {
+                    	// If not, go up the scope
+                        curScope = curScope.parent;
+                    }
+                }
+
+                if(!idSymbol) {
+                	// If it doesn't find it, throw an error;
+                    var errStr = "Undeclared Variable <strong>" + id + "</strong> on line " + node.getChildren()[0].getLineNumber() + ".";
+                    throw errStr;
+                } else {
+                	// If not, Type check
+                }
             }
             // Traverse the AST to create scope for each variable
-            if (node.getChildren().length == 0 || !node.getChildren()) {
-                // Leaf Node
-                //console.log("Hit a Leaf Node: " + node.getName());
-            } else {
+            if (node.getChildren().length != 0 || node.getChildren()) {
                 for (var i = 0; i < node.getChildren().length; i++) {
                     this.create(node.getChildren()[i]);
                 }
@@ -92,6 +116,10 @@ module Compiler {
         public addNode(node: ScopeNode): void {
             this.children.push(node);
         }
+
+        public getSymbol(id: string): Symbol {
+            return this.members[id];
+        }
     }
 
     export class Symbol {
@@ -100,6 +128,7 @@ module Compiler {
         public lineNumber: number;
         public scopeNumber: number;
         public isUsed: boolean = false;
+        public isInitialized: boolean = false;
 
         // constructor(type, name, lineNumber, scope) {
         //     this.type = type;
