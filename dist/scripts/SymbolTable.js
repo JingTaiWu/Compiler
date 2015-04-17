@@ -78,7 +78,7 @@ var Compiler;
                             throw errStr;
                         }
                     } else if (idType == "boolean") {
-                        if (assignedType == "true" || assignedType == "false" || assignedType == "==" || assignedType == "!=") {
+                        if (assignedType == "true" || assignedType == "false" || assignedType == "==" || assignedType == "!=" || assignedType == "boolean") {
                             // epsilon
                         } else {
                             throw errStr;

@@ -75,7 +75,7 @@ module Compiler {
                             throw errStr;
                     	}
                     } else if(idType == "boolean") {
-                    	if(assignedType == "true" || assignedType == "false" || assignedType == "==" || assignedType == "!=") {
+                    	if(assignedType == "true" || assignedType == "false" || assignedType == "==" || assignedType == "!=" || assignedType == "boolean") {
                     		// epsilon
                     	} else {
                     		throw errStr;
@@ -272,12 +272,5 @@ module Compiler {
         public scopeNumber: number;
         public isUsed: boolean = false;
         public isInitialized: boolean = false;
-
-        // constructor(type, name, lineNumber, scope) {
-        //     this.type = type;
-        //     this.name = name;
-        //     this.lineNumber = lineNumber;
-        //     this.scopeNumber = scope;
-        // }
     }
 }
