@@ -131,11 +131,13 @@ var Compiler;
                 var secondType = second.getName();
                 var boolval = /^((false)|(true))$/;
                 var digit = /^[0-9]$/;
+                var boolop = /^((==)|(!=))$/;
 
-                if (boolval.test(firstType)) {
+                // A few special cases
+                if (boolval.test(firstType) || boolop.test(firstType)) {
                     firstType = "boolean";
                 }
-                if (boolval.test(secondType)) {
+                if (boolval.test(secondType) || boolop.test(secondType)) {
                     secondType = "boolean";
                 }
                 if (digit.test(firstType)) {
