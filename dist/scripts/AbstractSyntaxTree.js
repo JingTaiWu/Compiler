@@ -110,6 +110,8 @@ var Compiler;
             newNode.setLineNumber(node.getLineNumber());
             newNode.isIdentifier = node.isIdentifier;
             newNode.isChar = node.isChar;
+            newNode.isBoolVal = node.isBoolVal;
+            newNode.isDigit = node.isDigit;
             if (!this.root || this.root == null) {
                 this.root = newNode;
                 this.currentNode = newNode;

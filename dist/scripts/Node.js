@@ -5,6 +5,8 @@ var Compiler;
 (function (Compiler) {
     var Node = (function () {
         function Node(name) {
+            this.isDigit = false;
+            this.isBoolVal = false;
             this.isChar = false;
             this.isIdentifier = false;
             this.children = [];

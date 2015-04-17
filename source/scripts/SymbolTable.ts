@@ -23,11 +23,17 @@ module Compiler {
             }
             // If it is VarDecl, add the variable to the symbol table
             if(node.getName() == "VarDecl") {
+            	var varName = node.getChildren()[1].getName();
+            	// first check if variable name is already declared in the scope
+            	if(this.currentNode.getSymbol(varName)) {
+            		var errStr = "Variable <strong>" + varName + "</strong> on line " + node.getChildren()[1].getLineNumber() + " is already declared!";
+                    throw errStr;
+            	}
                 var symbol = new Symbol();
                 // First Child of the node is the type
                 symbol.type = node.getChildren()[0].getName();
                 // Second Child of the node is the variable name
-                symbol.name = node.getChildren()[1].getName();
+                symbol.name = varName
                 symbol.lineNumber = node.getLineNumber();
                 symbol.scopeNumber = this.currentNode.scopeNumber;
 
@@ -76,14 +82,91 @@ module Compiler {
                     	}
                     } else if(idType == "int") {
                     	var digit = /^[0-9]$/;
-                    	if(assignedType == "IntExpr" || digit.test(assignedType) || assignedType == "int") {
+                    	if(assignedType == "+" || digit.test(assignedType) || assignedType == "int") {
                     		// epsilon
                     	} else {
                             throw errStr;
                     	}
                     }
+
+                    // Mark the ID as initialized
+                    idSymbol.isInitialized = true;
                 }
             }
+
+            if(node.getName() == "+") {
+            	// Just need to check if the second child is the right type
+                var child = node.getChildren()[1];
+               	if(child.isIdentifier) {
+                    var symbol = this.findId(child.getName());
+               		if(symbol) {
+               			if(symbol.type == "int") {
+               				// Epsilon
+               			} else {
+               				var errStr = "Type Mismatch: variable <strong>[" + child.getName() + "]</strong> on line " + child.getLineNumber() + ".";
+                            throw errStr;
+               			}
+               		} else {
+               			var errStr = "Undeclared Variable <strong>" + child.getName() + "</strong> on line " + child.getLineNumber() + ".";
+                    	throw errStr;
+               		}
+               	} else if(child.getName() == "+" || child.isDigit) {
+               		// Epsilon
+               	} else {
+               		var errStr = "Type Mismatch: variable <strong>[" + child.getName() + "]</strong> on line " + child.getLineNumber() + ".";
+                    throw errStr;
+               	}
+            }
+
+            if(node.getName() == "==" || node.getName() == "!=") {
+            	// Compare the left and the right operand
+                var first = node.getChildren()[0];
+                var second = node.getChildren()[1];
+                var firstType = first.getName();
+                var secondType = second.getName();
+                var boolval = /^((false)|(true))$/;
+                var digit = /^[0-9]$/
+
+                if(boolval.test(firstType)) {
+                	firstType = "boolean" 
+                }
+                if(boolval.test(secondType)) {
+                	secondType = "boolean" 
+                }
+                if(digit.test(firstType)) {
+                	firstType = "int" 
+                }
+                if(digit.test(secondType)) {
+                	secondType = "int" 
+                }
+
+                if(first.isIdentifier) {
+                    var symbol = this.findId(first.getName());
+                    if(symbol) {
+                        firstType = (symbol.type == "string") ? "StringExpr" : symbol.type;
+                    } else {
+                    	var errStr = "Undeclared Variable <strong>" + first.getName() + "</strong> on line " + first.getLineNumber() + ".";
+                    	throw errStr;
+                    }
+                }
+
+                if(second.isIdentifier) {
+                    var symbol = this.findId(second.getName());
+                    if(symbol) {
+                        secondType = (symbol.type == "string") ? "StringExpr" : symbol.type;
+                    } else {
+                    	var errStr = "Undeclared Variable <strong>" + second.getName() + "</strong> on line " + second.getLineNumber() + ".";
+                    	throw errStr;
+                    }
+                }
+
+                if(firstType != secondType) {
+					var errStr = "Type Mismatch between <strong>[" + first.getName() 
+					+ "]</strong> and <strong>[" + second.getName() + "]</strong> on line " + first.getLineNumber() + ".";
+                    throw errStr;
+                }                
+            }
+
             // Traverse the AST to create scope for each variable
             if (node.getChildren().length != 0 || node.getChildren()) {
                 for (var i = 0; i < node.getChildren().length; i++) {

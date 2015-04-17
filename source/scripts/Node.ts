@@ -7,6 +7,8 @@ module Compiler {
         private parentNode: Node;
         private name: string;
         private lineNumber: number;
+        public isDigit: boolean = false;
+        public isBoolVal: boolean = false;
         public isChar: boolean = false;
         public isIdentifier: boolean = false;
 

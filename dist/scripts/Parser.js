@@ -33,7 +33,8 @@ var Compiler;
             this.stdOut("Parsing a program.");
 
             // Make a node for CST
-            this.CST.addNode(new Compiler.Node("Program"), "BRANCH");
+            var newNode = new Compiler.Node("Program");
+            this.CST.addNode(newNode, "BRANCH");
             this.parseBlock();
             this.checkToken("EOF_TOKEN");
             //this.CST.returnToParent();
@@ -241,6 +242,15 @@ var Compiler;
                 newNode.setLineNumber(this.currentToken.getLineNumber());
                 if (this.currentToken.getKind() == "CHARACTER_TOKEN" || this.currentToken.getKind() == "SPACE_TOKEN") {
                     newNode.isChar = true;
+                }
+                if (this.currentToken.getKind() == "IDENTIFIER_TOKEN") {
+                    newNode.isIdentifier = true;
+                }
+                if (this.currentToken.getKind() == "DIGIT_TOKEN") {
+                    newNode.isDigit = true;
+                }
+                if (this.currentToken.getKind() == "BOOL_VAL_TOKEN") {
+                    newNode.isBoolVal = true;
                 }
                 this.CST.addNode(newNode, "LEAF");
                 this.currentToken = this.getNextToken();
