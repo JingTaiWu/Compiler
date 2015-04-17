@@ -88,7 +88,7 @@ var Compiler;
                 // This step is to concat all the character tokens together
                 this.buffering = !this.buffering;
                 if (!this.buffering) {
-                    var newNode = new Compiler.Node(this.buffer);
+                    var newNode = new Compiler.Node("\"" + this.buffer + "\"");
                     newNode.setLineNumber(node.getLineNumber());
                     this.buffer = "";
                     this.addNode(newNode, false);
