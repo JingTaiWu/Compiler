@@ -11,7 +11,7 @@ module Compiler {
     export class SemanticAnalysis {
         private CST: ConcreteSyntaxTree;
         private AST: AbstractSyntaxTree;
-        private SymbolTable: SymbolTable;
+        public SymbolTable: SymbolTable;
         constructor(CST: ConcreteSyntaxTree) {
             this.CST = CST;
         }
@@ -28,6 +28,11 @@ module Compiler {
         public createSymbolTable(): void {
             this.SymbolTable = new SymbolTable();
             this.SymbolTable.create(this.AST.getRootNode());
+        }
+
+        // issue warnings for unused variables
+        public checkVariables(): void {
+
         }
     }
 }

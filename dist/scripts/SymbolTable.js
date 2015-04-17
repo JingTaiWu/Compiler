@@ -37,7 +37,7 @@ var Compiler;
 
                 // Second Child of the node is the variable name
                 symbol.name = varName;
-                symbol.lineNumber = node.getLineNumber();
+                symbol.lineNumber = node.getChildren()[1].getLineNumber();
                 symbol.scopeNumber = this.currentNode.scopeNumber;
 
                 this.currentNode.addSymbol(symbol);
@@ -105,6 +105,7 @@ var Compiler;
                     if (symbol) {
                         if (symbol.type == "int") {
                             // Epsilon
+                            symbol.isUsed = true;
                         } else {
                             var errStr = "Type Mismatch: variable <strong>[" + child.getName() + "]</strong> on line " + child.getLineNumber() + ".";
                             throw errStr;
@@ -147,6 +148,7 @@ var Compiler;
                     var symbol = this.findId(first.getName());
                     if (symbol) {
                         firstType = (symbol.type == "string") ? "StringExpr" : symbol.type;
+                        symbol.isUsed = true;
                     } else {
                         var errStr = "Undeclared Variable <strong>" + first.getName() + "</strong> on line " + first.getLineNumber() + ".";
                         throw errStr;
@@ -157,6 +159,7 @@ var Compiler;
                     var symbol = this.findId(second.getName());
                     if (symbol) {
                         secondType = (symbol.type == "string") ? "StringExpr" : symbol.type;
+                        symbol.isUsed = true;
                     } else {
                         var errStr = "Undeclared Variable <strong>" + second.getName() + "</strong> on line " + second.getLineNumber() + ".";
                         throw errStr;
@@ -166,6 +169,21 @@ var Compiler;
                 if (firstType != secondType) {
                     var errStr = "Type Mismatch between <strong>[" + first.getName() + "]</strong> and <strong>[" + second.getName() + "]</strong> on line " + first.getLineNumber() + ".";
                     throw errStr;
+                }
+            }
+
+            if (node.getName() == "PrintStatement") {
+                if (node.getChildren().length == 1) {
+                    var child = node.getChildren()[0];
+                    if (child.isIdentifier) {
+                        var symbol = this.findId(child.getName());
+                        if (!symbol) {
+                            var errStr = "Undeclared Variable <strong>" + child.getName() + "</strong> on line " + child.getLineNumber() + ".";
+                            throw errStr;
+                        } else {
+                            symbol.isUsed = true;
+                        }
+                    }
                 }
             }
 

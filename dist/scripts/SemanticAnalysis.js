@@ -26,6 +26,10 @@ var Compiler;
             this.SymbolTable = new Compiler.SymbolTable();
             this.SymbolTable.create(this.AST.getRootNode());
         };
+
+        // issue warnings for unused variables
+        SemanticAnalysis.prototype.checkVariables = function () {
+        };
         return SemanticAnalysis;
     })();
     Compiler.SemanticAnalysis = SemanticAnalysis;

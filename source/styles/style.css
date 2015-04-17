@@ -36,9 +36,10 @@ textarea {
     overflow-y: auto;
 }
 
-#tokenPanel {
+#tokenPanel, #symbolPanel {
     height: 200px;
     overflow-y: auto;
+    font-weight: bold;
 }
 
 #tokenTable > thead {

@@ -5,7 +5,7 @@
 module Compiler {
     export class SymbolTable {
         private scopeNum: number;
-        private root: ScopeNode;
+        public root: ScopeNode;
         private currentNode: ScopeNode;
         constructor() {
             this.scopeNum = 0;
@@ -33,8 +33,8 @@ module Compiler {
                 // First Child of the node is the type
                 symbol.type = node.getChildren()[0].getName();
                 // Second Child of the node is the variable name
-                symbol.name = varName
-                symbol.lineNumber = node.getLineNumber();
+                symbol.name = varName;
+                symbol.lineNumber = node.getChildren()[1].getLineNumber();
                 symbol.scopeNumber = this.currentNode.scopeNumber;
 
                 this.currentNode.addSymbol(symbol);
@@ -102,6 +102,7 @@ module Compiler {
                		if(symbol) {
                			if(symbol.type == "int") {
                				// Epsilon
+                            symbol.isUsed = true;
                			} else {
                				var errStr = "Type Mismatch: variable <strong>[" + child.getName() + "]</strong> on line " + child.getLineNumber() + ".";
                             throw errStr;
@@ -144,6 +145,7 @@ module Compiler {
                     var symbol = this.findId(first.getName());
                     if(symbol) {
                         firstType = (symbol.type == "string") ? "StringExpr" : symbol.type;
+                        symbol.isUsed = true;
                     } else {
                     	var errStr = "Undeclared Variable <strong>" + first.getName() + "</strong> on line " + first.getLineNumber() + ".";
                     	throw errStr;
@@ -154,6 +156,7 @@ module Compiler {
                     var symbol = this.findId(second.getName());
                     if(symbol) {
                         secondType = (symbol.type == "string") ? "StringExpr" : symbol.type;
+                        symbol.isUsed = true;
                     } else {
                     	var errStr = "Undeclared Variable <strong>" + second.getName() + "</strong> on line " + second.getLineNumber() + ".";
                     	throw errStr;
@@ -165,6 +168,21 @@ module Compiler {
 					+ "]</strong> and <strong>[" + second.getName() + "]</strong> on line " + first.getLineNumber() + ".";
                     throw errStr;
                 }                
+            }
+
+            if(node.getName() == "PrintStatement") {
+            	if(node.getChildren().length == 1) {
+                    var child = node.getChildren()[0];
+                    if(child.isIdentifier) {
+                        var symbol = this.findId(child.getName());
+                        if(!symbol) {
+                        	var errStr = "Undeclared Variable <strong>" + child.getName() + "</strong> on line " + child.getLineNumber() + ".";
+                    		throw errStr;
+                        } else {
+                            symbol.isUsed = true;
+                        }
+                    }
+            	}
             }
 
             // Traverse the AST to create scope for each variable

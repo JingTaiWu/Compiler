@@ -13,7 +13,7 @@ var Compiler;
         // Initializes UI elements
         Control.init = function () {
             // clear all the panels
-            $("#log, #tokenTable > tbody:last, #CSTDisplay, #ASTDisplay").empty();
+            $("#log, #tokenTable > tbody:last, #CSTDisplay, #ASTDisplay, #symbolTable > tbody:last").empty();
 
             // Initialize state variables
             this.passLexer = false;
@@ -51,6 +51,7 @@ var Compiler;
                     SEMANTIC_ANALYZER.createSymbolTable();
                     this.stdNVOut("SEMANTIC", "Semantic analyzer found no errors");
                     this.displayTree(SEMANTIC_ANALYZER.getAST(), "AST");
+                    this.displayTable(SEMANTIC_ANALYZER.SymbolTable.root);
                 } catch (e) {
                     this.stdErr("SEMANTIC_ANALYSIS", e);
                 }
@@ -155,6 +156,22 @@ var Compiler;
 
             // Call the recursive function
             expand(src.getRootNode(), 0);
+        };
+
+        Control.displayTable = function (src) {
+            for (var key in src.members) {
+                var symbol = src.members[key];
+                var type = "<td>" + symbol.type + "</td>";
+                var line = "<td>" + symbol.lineNumber + "</td>";
+                var name = "<td>" + symbol.name + "</td>";
+                var scope = "<td>" + symbol.scopeNumber + "</td>";
+                var row = "<tr>" + type + name + scope + line + "</tr>";
+                $("#symbolTable > tbody:last").append(row);
+            }
+
+            for (var i = 0; i < src.children.length; i++) {
+                this.displayTable(src.children[i]);
+            }
         };
 
         // For log scrolling

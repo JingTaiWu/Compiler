@@ -14,7 +14,7 @@ module Compiler {
 
         constructor(input: string) {
             // Replace /t with nothing
-            this.input = input;
+            this.input = input.trim();
             this.count = 0;
             this.stringMode = false;
             this.tokens = [];
