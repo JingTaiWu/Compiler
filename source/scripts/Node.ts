@@ -8,6 +8,7 @@ module Compiler {
         private name: string;
         private lineNumber: number;
         public isChar: boolean = false;
+        public isIdentifier: boolean = false;
 
         constructor(name: string) {
             this.children = [];

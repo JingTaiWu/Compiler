@@ -38,28 +38,50 @@ module Compiler {
             // If it is AssignmentStatment, type check
             if(node.getName() == "AssignmentStatement") {
             	// Look up the type of the ID
-                var id = node.getChildren()[0].getName();
-                var idSymbol;
-                var curScope = this.currentNode;
-                while(curScope != null || curScope != undefined) {
-                	// Try to find it 
-                    idSymbol = curScope.getSymbol(id);
-                    if(idSymbol) {
-                    	// If it finds it, assign the result to the variable
-                    	// and break from the while loop
-                        break;
-                    } else {
-                    	// If not, go up the scope
-                        curScope = curScope.parent;
-                    }
-                }
+                var id: string = node.getChildren()[0].getName();
+                var idSymbol: Symbol = this.findId(id);
 
                 if(!idSymbol) {
                 	// If it doesn't find it, throw an error;
                     var errStr = "Undeclared Variable <strong>" + id + "</strong> on line " + node.getChildren()[0].getLineNumber() + ".";
                     throw errStr;
                 } else {
-                	// If not, Type check
+                	// If it does, Type check
+                    var idType: string = idSymbol.type;
+                    var assignedType: string;
+                    if(node.getChildren()[1].isIdentifier) {
+                    	// If the right hand side is an identifier, need to find it's real type
+                        var tempSymbol: Symbol = this.findId(node.getChildren()[1].getName());
+                        if(!tempSymbol) {
+                        	var errStr = "Undeclared Variable <strong>" + id + "</strong> on line " + node.getChildren()[0].getLineNumber() + ".";
+                    		throw errStr;
+                        } else {
+                            assignedType = tempSymbol.type;
+                        }
+                    } else {
+                    	assignedType = node.getChildren()[1].getName();
+                    }
+
+                    var errStr = "Type Mismatch: variable <strong>[" + id + "]</strong> on line " + node.getChildren()[0].getLineNumber() + ".";
+                    if(idType == "string") {
+                    	// if the id type is a string, the assigned type should be a string expression.
+                    	if(assignedType != "StringExpr") {
+                            throw errStr;
+                    	}
+                    } else if(idType == "boolean") {
+                    	if(assignedType == "true" || assignedType == "false") {
+                    		// epsilon
+                    	} else {
+                    		throw errStr;
+                    	}
+                    } else if(idType == "int") {
+                    	var digit = /^[0-9]$/;
+                    	if(assignedType == "IntExpr" || digit.test(assignedType) || assignedType == "int") {
+                    		// epsilon
+                    	} else {
+                            throw errStr;
+                    	}
+                    }
                 }
             }
             // Traverse the AST to create scope for each variable
@@ -72,6 +94,25 @@ module Compiler {
             //console.log("Exiting Scope " + this.currentNode.scopeNumber);
             // Return to Parent after going through all the children
             this.returnToParent();
+        }
+
+        public findId(id: string): Symbol {
+            var curScope: ScopeNode = this.currentNode;
+            var retVal;
+            while(curScope != null || curScope != undefined) {
+            	// Try to find it 
+                retVal = curScope.getSymbol(id);
+                if(retVal) {
+                	// If it finds it, assign the result to the variable
+                	// and break from the while loop
+                    break;
+                } else {
+                	// If not, go up the scope
+                    curScope = curScope.parent;
+                }
+            }
+
+            return retVal;
         }
 
         public addScope(scope: ScopeNode): void {

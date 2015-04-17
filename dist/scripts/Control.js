@@ -75,7 +75,7 @@ var Compiler;
         Control.stdErr = function (src, msg) {
             //var icon = "<span class='glyphicon glyphicon-remove-sign'></span>&nbsp";
             var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
-            var errStr = "<div class='list-group-item list-group-item-danger'>" + label + msg + "</div>";
+            var errStr = "<div class='list-group-item list-group-item-danger'>ERROR: " + label + msg + "</div>";
 
             $("#log").append(errStr);
             Control.scroll();
@@ -94,7 +94,7 @@ var Compiler;
         // For issuing warnings
         Control.stdWarn = function (src, msg) {
             var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
-            var printStr = "<div class='list-group-item list-group-item-warning'>" + label + msg + "</div>";
+            var printStr = "<div class='list-group-item list-group-item-warning'>WARNING: " + label + msg + "</div>";
 
             $("#log").append(printStr);
             Control.scroll();

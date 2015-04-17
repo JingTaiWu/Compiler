@@ -41,25 +41,49 @@ var Compiler;
             if (node.getName() == "AssignmentStatement") {
                 // Look up the type of the ID
                 var id = node.getChildren()[0].getName();
-                var idSymbol;
-                var curScope = this.currentNode;
-                while (curScope != null || curScope != undefined) {
-                    // Try to find it
-                    idSymbol = curScope.getSymbol(id);
-                    if (idSymbol) {
-                        break;
-                    } else {
-                        // If not, go up the scope
-                        curScope = curScope.parent;
-                    }
-                }
+                var idSymbol = this.findId(id);
 
                 if (!idSymbol) {
                     // If it doesn't find it, throw an error;
                     var errStr = "Undeclared Variable <strong>" + id + "</strong> on line " + node.getChildren()[0].getLineNumber() + ".";
                     throw errStr;
                 } else {
-                    // If not, Type check
+                    // If it does, Type check
+                    var idType = idSymbol.type;
+                    var assignedType;
+                    if (node.getChildren()[1].isIdentifier) {
+                        // If the right hand side is an identifier, need to find it's real type
+                        var tempSymbol = this.findId(node.getChildren()[1].getName());
+                        if (!tempSymbol) {
+                            var errStr = "Undeclared Variable <strong>" + id + "</strong> on line " + node.getChildren()[0].getLineNumber() + ".";
+                            throw errStr;
+                        } else {
+                            assignedType = tempSymbol.type;
+                        }
+                    } else {
+                        assignedType = node.getChildren()[1].getName();
+                    }
+
+                    var errStr = "Type Mismatch: variable <strong>[" + id + "]</strong> on line " + node.getChildren()[0].getLineNumber() + ".";
+                    if (idType == "string") {
+                        // if the id type is a string, the assigned type should be a string expression.
+                        if (assignedType != "StringExpr") {
+                            throw errStr;
+                        }
+                    } else if (idType == "boolean") {
+                        if (assignedType == "true" || assignedType == "false") {
+                            // epsilon
+                        } else {
+                            throw errStr;
+                        }
+                    } else if (idType == "int") {
+                        var digit = /^[0-9]$/;
+                        if (assignedType == "IntExpr" || digit.test(assignedType) || assignedType == "int") {
+                            // epsilon
+                        } else {
+                            throw errStr;
+                        }
+                    }
                 }
             }
 
@@ -73,6 +97,23 @@ var Compiler;
             //console.log("Exiting Scope " + this.currentNode.scopeNumber);
             // Return to Parent after going through all the children
             this.returnToParent();
+        };
+
+        SymbolTable.prototype.findId = function (id) {
+            var curScope = this.currentNode;
+            var retVal;
+            while (curScope != null || curScope != undefined) {
+                // Try to find it
+                retVal = curScope.getSymbol(id);
+                if (retVal) {
+                    break;
+                } else {
+                    // If not, go up the scope
+                    curScope = curScope.parent;
+                }
+            }
+
+            return retVal;
         };
 
         SymbolTable.prototype.addScope = function (scope) {

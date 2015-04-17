@@ -6,6 +6,7 @@ var Compiler;
     var Node = (function () {
         function Node(name) {
             this.isChar = false;
+            this.isIdentifier = false;
             this.children = [];
             this.name = name;
         }

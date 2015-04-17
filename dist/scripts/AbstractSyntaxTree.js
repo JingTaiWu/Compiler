@@ -40,6 +40,7 @@ var Compiler;
                 isBranch = true;
             } else if (node.getName() == "Id") {
                 // For Identifier token, we can skip the ID node and keep the name of ID
+                node.getChildren()[0].isIdentifier = true;
                 this.addNode(node.getChildren()[0], false);
                 isBranch = false;
             } else if (node.getName() == "int" || node.getName() == "string" || node.getName() == "boolean") {
@@ -107,6 +108,8 @@ var Compiler;
         AbstractSyntaxTree.prototype.addNode = function (node, isBranch) {
             var newNode = new Compiler.Node(node.getName());
             newNode.setLineNumber(node.getLineNumber());
+            newNode.isIdentifier = node.isIdentifier;
+            newNode.isChar = node.isChar;
             if (!this.root || this.root == null) {
                 this.root = newNode;
                 this.currentNode = newNode;
