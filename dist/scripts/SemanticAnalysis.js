@@ -27,8 +27,23 @@ var Compiler;
             this.SymbolTable.create(this.AST.getRootNode());
         };
 
-        // issue warnings for unused variables
-        SemanticAnalysis.prototype.checkVariables = function () {
+        // issue warnings for unused/intialized variables
+        SemanticAnalysis.prototype.checkVariables = function (src) {
+            for (var key in src.members) {
+                var symbol = src.members[key];
+                if (!symbol.isInitialized) {
+                    var str = "Variable <strong>[" + symbol.name + "]</strong> is never initialized.";
+                    Compiler.Control.stdWarn("SEMANTIC_ANALYSIS", str);
+                }
+                if (!symbol.isUsed) {
+                    var str = "Variable <strong>[" + symbol.name + "]</strong> is never used.";
+                    Compiler.Control.stdWarn("SEMANTIC_ANALYSIS", str);
+                }
+            }
+
+            for (var i = 0; i < src.children.length; i++) {
+                this.checkVariables(src.children[i]);
+            }
         };
         return SemanticAnalysis;
     })();

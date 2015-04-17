@@ -50,6 +50,7 @@ var Compiler;
                     SEMANTIC_ANALYZER.createAST();
                     SEMANTIC_ANALYZER.createSymbolTable();
                     this.stdNVOut("SEMANTIC", "Semantic analyzer found no errors");
+                    SEMANTIC_ANALYZER.checkVariables(SEMANTIC_ANALYZER.SymbolTable.root);
                     this.displayTree(SEMANTIC_ANALYZER.getAST(), "AST");
                     this.displayTable(SEMANTIC_ANALYZER.SymbolTable.root);
                 } catch (e) {
