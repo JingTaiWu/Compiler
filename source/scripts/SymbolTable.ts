@@ -91,6 +91,7 @@ module Compiler {
 
                     // Mark the ID as initialized
                     idSymbol.isInitialized = true;
+                    idSymbol.isUsed = true;
                 }
             }
 
