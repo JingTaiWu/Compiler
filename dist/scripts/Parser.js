@@ -237,7 +237,7 @@ var Compiler;
         Parser.prototype.checkToken = function (expectedKind) {
             //this.stdOut("Current Index " + this.index);
             if (this.currentToken.getKind() == expectedKind) {
-                this.stdOut("Expecting <strong>[" + expectedKind + "]</strong>. Found <strong>[" + this.currentToken.getValue() + "]</strong>.");
+                this.stdOut("Expecting <strong> [" + expectedKind + " ]</strong>. Found <strong>[ " + this.currentToken.getValue() + " ]</strong>.");
                 var newNode = new Compiler.Node(this.currentToken.getValue());
                 newNode.setLineNumber(this.currentToken.getLineNumber());
                 if (this.currentToken.getKind() == "CHARACTER_TOKEN" || this.currentToken.getKind() == "SPACE_TOKEN") {
@@ -256,7 +256,7 @@ var Compiler;
                 this.currentToken = this.getNextToken();
                 return true;
             } else {
-                var errStr = "Expecting <strong>[" + expectedKind + "]</strong>. Found <strong>[" + this.currentToken.getValue() + "]</strong>. On line " + this.currentToken.getLineNumber();
+                var errStr = "Expecting <strong>[ " + expectedKind + " ]</strong>. Found <strong>[ " + this.currentToken.getValue() + " ]</strong>. On line " + this.currentToken.getLineNumber();
                 this.errorCount++;
                 throw errStr;
             }

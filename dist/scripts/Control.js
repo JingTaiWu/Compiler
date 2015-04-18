@@ -1,6 +1,7 @@
 /// <reference path="jquery.d.ts"/>
 /// <reference path="globals.ts"/>
 /// <reference path="Lexer.ts"/>
+/// <reference path="Parser.ts"/>
 /// <reference path="SemanticAnalysis.ts"/>
 /*
 This Class manages the UI elements on the webpage

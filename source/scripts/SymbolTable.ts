@@ -71,9 +71,11 @@ module Compiler {
                     var errStr = "Type Mismatch: variable <strong>[" + id + "]</strong> on line " + node.getChildren()[0].getLineNumber() + ".";
                     if(idType == "string") {
                     	// if the id type is a string, the assigned type should be a string expression.
-                    	if(assignedType != "StringExpr") {
+                    	if(assignedType == "StringExpr" || assignedType == "string") {
+                            // Epsilon
+                    	} else {
                             throw errStr;
-                    	}
+                        }
                     } else if(idType == "boolean") {
                     	if(assignedType == "true" || assignedType == "false" || assignedType == "==" || assignedType == "!=" || assignedType == "boolean") {
                     		// epsilon
