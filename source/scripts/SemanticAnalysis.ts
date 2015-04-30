@@ -1,4 +1,5 @@
 /// <reference path="SymbolTable.ts"/>
+/// <reference path="AbstractSyntaxTree.ts"/>
 /*
     Semantic Analysis - Third step of the compiler. After parsing is complete, a CST is passed to the
     semantic analysis. Semantic analysis examines the CST and create an AST from it. It is also responsible
@@ -32,11 +33,11 @@ module Compiler {
             for(var key in src.members) {
                 var symbol: Symbol = src.members[key];
                 if(!symbol.isInitialized) {
-                    var str = "Variable <strong>[" + symbol.name + "]</strong> in Scope [" + symbol.scopeNumber + "] was never initialized.";
+                    var str = "Variable <strong>[ " + symbol.name + " ]</strong> in Scope [ <strong>" + symbol.scopeNumber + "</strong> ] was never initialized.";
                     Control.stdWarn("SEMANTIC_ANALYSIS", str);
                 }
                 if(!symbol.isUsed) {
-                    var str = "Variable <strong>[" + symbol.name + "]</strong> in Scope [" + symbol.scopeNumber + "] was never used.";
+                    var str = "Variable <strong>[ " + symbol.name + " ]</strong> in Scope [ <strong>" + symbol.scopeNumber + "</strong> ] was never used.";
                     Control.stdWarn("SEMANTIC_ANALYSIS", str);
                 }
             }

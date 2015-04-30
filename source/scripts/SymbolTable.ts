@@ -1,6 +1,6 @@
 /// <reference path="ConcreteSyntaxTree.ts"/>
 /*
-    SymbolTable - For scope checking
+    SymbolTable - Scope checking and type checking is done while traversing the AST.
 */
 module Compiler {
     export class SymbolTable {
@@ -93,7 +93,6 @@ module Compiler {
 
                     // Mark the ID as initialized
                     idSymbol.isInitialized = true;
-                    idSymbol.isUsed = true;
                 }
             }
 

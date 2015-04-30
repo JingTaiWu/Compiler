@@ -48,7 +48,7 @@ module Compiler {
                     AST = SEMANTIC_ANALYZER.getAST();
                     SEMANTIC_ANALYZER.createAST();
                     SEMANTIC_ANALYZER.createSymbolTable();
-                    this.stdNVOut("SEMANTIC", "Semantic analyzer found no errors");
+                    this.stdNVOut("SEMANTIC ANALYSIS", "Semantic analyzer found no errors.");
                     SEMANTIC_ANALYZER.checkVariables(SEMANTIC_ANALYZER.SymbolTable.root);
                     this.displayTree(SEMANTIC_ANALYZER.getAST(), "AST");
                     this.displayTable(SEMANTIC_ANALYZER.SymbolTable.root);
@@ -75,7 +75,7 @@ module Compiler {
         public static stdErr(src: string, msg: string): void {
             //var icon = "<span class='glyphicon glyphicon-remove-sign'></span>&nbsp";
             var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
-            var errStr = "<div class='list-group-item list-group-item-danger'>ERROR: " + label + msg + "</div>";
+            var errStr = "<div class='list-group-item list-group-item-danger'><strong>ERROR:</strong> " + label + msg + "</div>";
 
             $("#log").append(errStr);
             Control.scroll();
@@ -94,7 +94,7 @@ module Compiler {
         // For issuing warnings
         public static stdWarn(src: string, msg: string): void {
             var label = "<span class='label label-default'>" + src + "</span>&nbsp ---- ";
-            var printStr = "<div class='list-group-item list-group-item-warning'>WARNING: " + label + msg + "</div>";
+            var printStr = "<div class='list-group-item list-group-item-warning'><strong>WARNING:</strong> " + label + msg + "</div>";
 
             $("#log").append(printStr);
             Control.scroll();

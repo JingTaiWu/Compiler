@@ -246,7 +246,7 @@ module Compiler {
         public checkToken(expectedKind: string): boolean {
             //this.stdOut("Current Index " + this.index);
             if(this.currentToken.getKind() == expectedKind) {
-                this.stdOut("Expecting <strong> [" + expectedKind + " ]</strong>. Found <strong>[ " + this.currentToken.getValue() + " ]</strong>.");
+                this.stdOut("Expecting <strong> [ " + expectedKind + " ]</strong>. Found <strong>[ " + this.currentToken.getValue() + " ]</strong>.");
                 var newNode = new Node(this.currentToken.getValue());
                 newNode.setLineNumber(this.currentToken.getLineNumber());
                 if(this.currentToken.getKind() == "CHARACTER_TOKEN" || this.currentToken.getKind() == "SPACE_TOKEN") {
