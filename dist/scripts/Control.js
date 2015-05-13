@@ -16,6 +16,9 @@ var Compiler;
         Control.init = function () {
             // clear all the panels
             $("#log, #tokenTable > tbody:last, #CSTDisplay, #ASTDisplay, #CodeGenDisplay, #symbolTable > tbody:last").empty();
+            this.passLexer = false;
+            this.passParser = false;
+            this.passSemanticAnalysis = false;
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
             LEXER = new Compiler.Lexer(input);
@@ -58,7 +61,7 @@ var Compiler;
             }
             if (this.passSemanticAnalysis) {
                 CODE_GEN = new Compiler.CodeGeneration(SYMBOL_TABLE);
-                CODE_GEN.toMachineCode(AST.getRootNode());
+                CODE_GEN.toExecutableImage(AST.getRootNode());
                 this.displayCodeGen(CODE_GEN.ExecutableImage);
                 try {
                 }
@@ -176,9 +179,6 @@ var Compiler;
                 scrollTop: $("#log")[0].scrollHeight
             }, 50);
         };
-        Control.passLexer = false;
-        Control.passParser = false;
-        Control.passSemanticAnalysis = false;
         return Control;
     })();
     Compiler.Control = Control;

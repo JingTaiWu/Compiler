@@ -10,17 +10,19 @@
 */
 module Compiler {
     export class Control {
-        public static passLexer: boolean = false;
-        public static passParser: boolean = false;
-        public static passSemanticAnalysis: boolean = false;
+        public static passLexer: boolean;
+        public static passParser: boolean;
+        public static passSemanticAnalysis: boolean;
         // Initializes UI elements
         public static init() {
             // clear all the panels
             $("#log, #tokenTable > tbody:last, #CSTDisplay, #ASTDisplay, #CodeGenDisplay, #symbolTable > tbody:last").empty();
+            this.passLexer = false;
+            this.passParser = false;
+            this.passSemanticAnalysis = false;
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
             LEXER = new Compiler.Lexer(input);
-
             try {
                 this.passLexer = LEXER.toTokens();
                 this.stdNVOut("LEXER", "Lexer found no errors.");
@@ -60,7 +62,7 @@ module Compiler {
 
             if(this.passSemanticAnalysis) {
                 CODE_GEN = new CodeGeneration(SYMBOL_TABLE);
-                CODE_GEN.toMachineCode(AST.getRootNode());
+                CODE_GEN.toExecutableImage(AST.getRootNode());
                 this.displayCodeGen(CODE_GEN.ExecutableImage);
                 try {
 

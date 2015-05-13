@@ -24,7 +24,13 @@ module Compiler {
             this.symbolTable = symbolTable;
         }
 
-        // Take the AST and convert it to machine code
+        public toExecutableImage(node: Node): void {
+            this.toMachineCode(node);
+            console.log("Index: " + this.index);
+            this.replaceTemp();
+        }
+
+        // Take the AST and convert it to machine code (Temp/Jump not replaced)
         public toMachineCode(node: Node): void {
             // traverse the AST
             if(node.getName() == "Block") {
@@ -45,12 +51,12 @@ module Compiler {
                     var tempVar = this.checkTempTable(varName, this.scopeNumber);
                     if(!tempVar) {
                         tempVar = new TempVar(this.TempVarCount++, varName, this.scopeNumber);
-                        this.StaticTable.push(tempVar);
+                        this.StaticTable[tempVar.tempName] = tempVar;
                     }
                     var tempByte = new Byte(tempVar.tempName);
                     tempByte.isTempVar = true;
                     this.addByte(tempByte, this.index, false);
-                    this.addByte(new Byte("XX"), this.index, false);
+                    this.addByte(new Byte("00"), this.index, false);
                 }
             }
 
@@ -70,12 +76,12 @@ module Compiler {
                     var tempVar = this.checkTempTable(varName, this.scopeNumber);
                     if(!tempVar) {
                         tempVar = new TempVar(this.TempVarCount++, varName, this.scopeNumber);
-                        this.StaticTable.push(tempVar);
+                        this.StaticTable[tempVar.tempName] = tempVar;
                     }
                     var tempByte = new Byte(tempVar.tempName);
                     tempByte.isTempVar = true;
                     this.addByte(tempByte, this.index, false);
-                    this.addByte(new Byte("XX"), this.index, false);
+                    this.addByte(new Byte("00"), this.index, false);
                 }
             }
 
@@ -114,14 +120,36 @@ module Compiler {
 
         public checkTempTable(varName: string, scope: number): TempVar {
             var retVal = null;
-            for (var i = 0; i < this.StaticTable.length; i++) {
-                var tempVar = this.StaticTable[i];
-                if(tempVar.variable == varName && tempVar.scope == scope) {
-                    retVal = tempVar;
+
+            for(var key in this.StaticTable) {
+                var entry = this.StaticTable[key];
+                if(entry.variable == varName && entry.scope == scope) {
+                    retVal = entry;
                 }
             }
-
             return retVal;
+        }
+
+        // After all the instructions have been set, we need to go back to the Temporary variables and replace them with
+        // actual locations
+        public replaceTemp(): void {
+            // Print the static
+            for (var key in this.StaticTable) {
+                console.log(this.StaticTable[key].tempName + " " + this.StaticTable[key].scope + " " + this.StaticTable[key].offset);
+            }
+            for (var i = 0; i < this.ExecutableImage.length; i++) {
+                var tempByte = this.ExecutableImage[i];
+                if(tempByte.isTempVar) {
+                    // Look up the variable in the static table and get the offset
+                    var offset = this.StaticTable[tempByte.byte].offset + this.index;
+                    if(offset > 255) {
+                        throw "Index Out Of Bound";
+                    }
+                    // Convert offset to a hex string
+                    var offsetString = offset.toString(16).toUpperCase();
+                    tempByte.byte = offsetString;
+                }
+            }
         }
     }
 
