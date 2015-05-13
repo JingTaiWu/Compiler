@@ -19,7 +19,7 @@ $(document).ready(function(){
     });
     // Example programs
     $("#example_1").click(function() {
-        var codeStr = "{\n\tint a\n\ta = 0\n\tprint(a)\n}$"
+        var codeStr = "{\n\tint a\n\ta = 0\n\tint b\n\tb = 0\n\tprint(a)\n\tprint(b)\n}$"
         $("#codeInput").text(codeStr);
     });
     $("#example_2").click(function() {

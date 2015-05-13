@@ -16,10 +16,16 @@ textarea {
     height: 350px;
 }
 
-#CSTDisplay, #CodeGenDisplay, #ASTDisplay{
+#CSTDisplay, #ASTDisplay{
     font-size: 16px;
     height: 300px;
     white-space: nowrap;
+    overflow: auto;
+}
+
+#CodeGenDisplay {
+    font-size: 16px;
+    height: 300px;
     overflow: auto;
 }
 

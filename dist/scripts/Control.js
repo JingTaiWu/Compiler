@@ -3,6 +3,7 @@
 /// <reference path="Lexer.ts"/>
 /// <reference path="Parser.ts"/>
 /// <reference path="SemanticAnalysis.ts"/>
+/// <reference path="CodeGen.ts"/>
 /*
     This Class manages the UI elements on the webpage
 */
@@ -14,10 +15,7 @@ var Compiler;
         // Initializes UI elements
         Control.init = function () {
             // clear all the panels
-            $("#log, #tokenTable > tbody:last, #CSTDisplay, #ASTDisplay, #symbolTable > tbody:last").empty();
-            // Initialize state variables
-            this.passLexer = false;
-            this.passParser = false;
+            $("#log, #tokenTable > tbody:last, #CSTDisplay, #ASTDisplay, #CodeGenDisplay, #symbolTable > tbody:last").empty();
             // Obtain the code from the text area and pass it into the Lexer
             var input = $("#codeInput").val();
             LEXER = new Compiler.Lexer(input);
@@ -44,16 +42,28 @@ var Compiler;
             if (this.passParser) {
                 try {
                     SEMANTIC_ANALYZER = new Compiler.SemanticAnalysis(PARSER.getCST());
-                    AST = SEMANTIC_ANALYZER.getAST();
                     SEMANTIC_ANALYZER.createAST();
+                    AST = SEMANTIC_ANALYZER.getAST();
                     SEMANTIC_ANALYZER.createSymbolTable();
+                    SYMBOL_TABLE = SEMANTIC_ANALYZER.SymbolTable;
                     this.stdNVOut("SEMANTIC ANALYSIS", "Semantic analyzer found no errors.");
                     SEMANTIC_ANALYZER.checkVariables(SEMANTIC_ANALYZER.SymbolTable.root);
                     this.displayTree(SEMANTIC_ANALYZER.getAST(), "AST");
                     this.displayTable(SEMANTIC_ANALYZER.SymbolTable.root);
+                    this.passSemanticAnalysis = true;
                 }
                 catch (e) {
                     this.stdErr("SEMANTIC_ANALYSIS", e);
+                }
+            }
+            if (this.passSemanticAnalysis) {
+                CODE_GEN = new Compiler.CodeGeneration(SYMBOL_TABLE);
+                CODE_GEN.toMachineCode(AST.getRootNode());
+                this.displayCodeGen(CODE_GEN.ExecutableImage);
+                try {
+                }
+                catch (e) {
+                    this.stdErr("CODE_GENERATION", e);
                 }
             }
         };
@@ -155,12 +165,20 @@ var Compiler;
                 this.displayTable(src.children[i]);
             }
         };
+        Control.displayCodeGen = function (src) {
+            for (var i = 0; i < src.length; i++) {
+                $("#CodeGenDisplay").append(src[i].byte + " ");
+            }
+        };
         // For log scrolling
         Control.scroll = function () {
             $("#log").animate({
                 scrollTop: $("#log")[0].scrollHeight
             }, 50);
         };
+        Control.passLexer = false;
+        Control.passParser = false;
+        Control.passSemanticAnalysis = false;
         return Control;
     })();
     Compiler.Control = Control;
