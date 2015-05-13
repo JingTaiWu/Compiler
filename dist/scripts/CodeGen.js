@@ -19,7 +19,7 @@ var Compiler;
         }
         CodeGeneration.prototype.toExecutableImage = function (node) {
             this.toMachineCode(node);
-            //this.fill();
+            this.fill();
             this.replaceTemp();
         };
         // Take the AST and convert it to machine code (Temp/Jump not replaced)
@@ -35,16 +35,16 @@ var Compiler;
                 if (node.getChildren()[0].getName() == "int") {
                     // Machine code for integer declaration:
                     // A9 00 -> Store ACC with constant 00 (default value for int)
-                    this.addByte(new Byte("A9"), this.index);
-                    this.addByte(new Byte("00"), this.index);
-                    // 8D T0 XX -> Store the accumulator in memory (T0 XX represents a memory location in stack)
-                    this.addByte(new Byte("8D"), this.index);
+                    this.addByte(new Byte("A9"), this.index, false);
+                    this.addByte(new Byte("00"), this.index, false);
+                    // 8D TX XX -> Store the accumulator in memory (T0 XX represents a memory location in stack)
+                    this.addByte(new Byte("8D"), this.index, false);
                     // Check the static table for the variable
                     var tempVar = this.checkStaticTable(varName);
                     var tempByte = new Byte(tempVar.tempName);
                     tempByte.isTempVar = true;
-                    this.addByte(tempByte, this.index);
-                    this.addByte(new Byte("00"), this.index);
+                    this.addByte(tempByte, this.index, false);
+                    this.addByte(new Byte("00"), this.index, false);
                 }
                 else if (node.getChildren()[0].getName() == "string") {
                     // String
@@ -64,17 +64,39 @@ var Compiler;
                         value = "0" + value;
                     }
                     // A9 value -> Store ACC with the given constant
-                    this.addByte(new Byte("A9"), this.index);
-                    this.addByte(new Byte(value), this.index);
-                    // 8D T0 XX
-                    this.addByte(new Byte("8D"), this.index);
+                    this.addByte(new Byte("A9"), this.index, false);
+                    this.addByte(new Byte(value), this.index, false);
+                    // 8D TX XX
+                    this.addByte(new Byte("8D"), this.index, false);
                     var tempVar = this.checkStaticTable(varName);
                     var tempByte = new Byte(tempVar.tempName);
                     tempByte.isTempVar = true;
-                    this.addByte(tempByte, this.index);
-                    this.addByte(new Byte("00"), this.index);
+                    this.addByte(tempByte, this.index, false);
+                    this.addByte(new Byte("00"), this.index, false);
                 }
                 else if (varType == "string") {
+                    // for string assignment, write the characters to heap
+                    var str = node.getChildren()[1].getChildren()[0].getName();
+                    // trim out the quotation marks
+                    str = str.substring(1, str.length - 1);
+                    // Add "00" to the end of string
+                    this.addByte(new Byte("00"), this.heapIndex, true);
+                    for (var i = str.length - 1; i > -1; i--) {
+                        var hexVal = str.charCodeAt(i).toString(16);
+                        hexVal = (hexVal.length < 2) ? "0" + hexVal : hexVal;
+                        this.addByte(new Byte(hexVal), this.heapIndex, true);
+                    }
+                    // A9 XX (XX is the starting location of the string)
+                    this.addByte(new Byte("A9"), this.index, false);
+                    var memLocation = (this.heapIndex + 1).toString(16);
+                    memLocation = (memLocation.length < 2) ? "0" + memLocation : memLocation;
+                    this.addByte(new Byte(memLocation), this.index, false);
+                    // 8D TX XX
+                    this.addByte(new Byte("8D"), this.index, false);
+                    var tempVar = this.checkStaticTable(varName);
+                    var tempByte = new Byte(tempVar.tempName);
+                    tempByte.isTempVar = true;
+                    this.addByte(new Byte("00"), this.index, false);
                 }
             }
             for (var i = 0; i < node.getChildren().length; i++) {
@@ -84,16 +106,22 @@ var Compiler;
                 this.scopeNumber--;
             }
         };
-        CodeGeneration.prototype.addByte = function (byte, index) {
+        CodeGeneration.prototype.addByte = function (byte, index, isAtHeap) {
             // The total size of the executable image is 256 bytes startings from 0 to 255
-            if (index >= 256) {
+            if (index >= this.ImageSize) {
                 throw "Index exceeds maxmium size of the executable image.";
             }
             if (this.ExecutableImage[index] != null) {
-                throw "There is already a byte at index " + index + " .";
+                throw "Out of Stack Space.";
             }
+            byte.byte = byte.byte.toUpperCase();
             this.ExecutableImage[index] = byte;
-            this.index++;
+            if (isAtHeap) {
+                this.heapIndex--;
+            }
+            else {
+                this.index++;
+            }
         };
         CodeGeneration.prototype.getType = function (varName, scopeNumber, node) {
             var retVal = null;
