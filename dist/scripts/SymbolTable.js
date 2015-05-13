@@ -232,12 +232,15 @@ var Compiler;
                 console.log("This shouldn't really happen.");
             }
         };
+        SymbolTable.prototype.getRoot = function () {
+            return this.root;
+        };
         return SymbolTable;
     })();
     Compiler.SymbolTable = SymbolTable;
     var ScopeNode = (function () {
         function ScopeNode() {
-            this.members = {};
+            this.members = [];
             this.children = [];
         }
         ScopeNode.prototype.addSymbol = function (sym) {
@@ -248,6 +251,9 @@ var Compiler;
         };
         ScopeNode.prototype.getSymbol = function (id) {
             return this.members[id];
+        };
+        ScopeNode.prototype.getChildren = function () {
+            return this.children;
         };
         return ScopeNode;
     })();

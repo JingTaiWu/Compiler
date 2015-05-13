@@ -242,16 +242,20 @@ module Compiler {
                 console.log("This shouldn't really happen.");
             }
         }
+
+        public getRoot(): ScopeNode {
+            return this.root;
+        }
     }
 
     export class ScopeNode {
         public scopeNumber: number;
-        public members;
+        public members: Symbol[];
         public parent: ScopeNode;
         public children: ScopeNode[];
 
         constructor() {
-            this.members = {};
+            this.members = [];
             this.children = [];
         }
 
@@ -265,6 +269,10 @@ module Compiler {
 
         public getSymbol(id: string): Symbol {
             return this.members[id];
+        }
+
+        public getChildren(): ScopeNode[] {
+            return this.children;
         }
     }
 
