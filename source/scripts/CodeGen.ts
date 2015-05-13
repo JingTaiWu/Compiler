@@ -2,6 +2,7 @@
 /// <reference path="SymbolTable.ts"/>
 /*
 	Code Generation - translate the AST into machine code (6502a instruction page)
+    Due to a lack of time, I couldn't write this code in a more elegant way.
 */
 module Compiler {
     export class CodeGeneration {
@@ -27,6 +28,20 @@ module Compiler {
         }
 
         public toExecutableImage(node: Node): void {
+            // Write true and false to heap
+            // Location of true in heap is 251
+            // Location of false in heap is 245
+            var boolVal = ["true", "false"];
+            for (var j = 0; j < boolVal.length; j++) {
+                this.addByte(new Byte("00"), this.heapIndex, true);
+                for (var i = boolVal[j].length - 1; i > -1; i--) {
+                    var hexVal = boolVal[j].charCodeAt(i).toString(16);
+                    hexVal = (hexVal.length < 2) ? "0" + hexVal : hexVal;
+                    this.addByte(new Byte(hexVal), this.heapIndex, true);
+                }
+            }
+
+            // Convert to machine code
             this.toMachineCode(node);
             this.fill();
             this.replaceTemp();
@@ -66,10 +81,8 @@ module Compiler {
             if(node.getName() == "AssignmentStatement") {
                 var varName = node.getChildren()[0].getName();
                 var varType = this.getType(varName, this.scopeNumber, this.symbolTable.getRoot());
-                console.log("AssignmentStatment (var type " + varType + ").");
                 
                 if(varType == "int") {
-                    console.log("Assign int");
                     var value = node.getChildren()[1].getName();
                     // Pad the 0 for numbers
                     if (value.length < 2) { value = "0" + value;}
@@ -106,8 +119,39 @@ module Compiler {
                     var tempVar = this.checkStaticTable(varName);
                     var tempByte = new Byte(tempVar.tempName);
                     tempByte.isTempVar = true;
+                    this.addByte(tempByte, this.index, false);
                     this.addByte(new Byte("00"), this.index, false);
+                } else if(varType = "boolean") {
+                    // True or False
                 }
+            }
+
+            if(node.getName() == "PrintStatement") {
+                // Case 1: Identifier
+                if(node.getChildren()[0].getName().match(/^[a-z]$/g)) {
+                    var varName = node.getChildren()[0].getName();
+                    // AC TX XX - Load Y Reg from mem
+                    // A2 01 - Load X Reg with constant
+                    // FF - System call
+                    var tempVar = this.checkStaticTable(varName);
+                    this.addByte(new Byte("AC"), this.index, false);
+                    var tempByte = new Byte(tempVar.tempName);
+                    tempByte.isTempVar = true;
+                    this.addByte(tempByte, this.index, false);
+                    this.addByte(new Byte("00"), this.index, false);
+                    // If X register is 01, then prints a string from address stored in Y reg
+                    // If X register is 02, print integer stored in Y reg
+                    this.addByte(new Byte("A2"), this.index, false);
+                    var varType = this.getType(tempVar.variable, this.scopeNumber, this.symbolTable.getRoot());
+                    if(varType == "int") {
+                        this.addByte(new Byte("01"), this.index, false);
+                    } else {
+                        this.addByte(new Byte("02"), this.index, false);
+                    }
+                }
+
+                // Ends with a system call
+                this.addByte(new Byte("FF"), this.index, false);
             }
 
             for (var i = 0; i < node.getChildren().length; i++) {
