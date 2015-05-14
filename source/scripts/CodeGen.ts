@@ -18,6 +18,7 @@ module Compiler {
         private heapIndex: number;
         private symbolTable: SymbolTable;
         private symbolArray: ScopeNode[];
+        private curScopeNode: ScopeNode;
         constructor(symbolTable: SymbolTable) {
             this.ExecutableImage = [];
             this.ImageSize = 256;
@@ -67,6 +68,11 @@ module Compiler {
                 this.scopeNumber++;
                 // Need to keep track of the amount of bytes in a block for jump
                 this.JumpOffset = this.index;
+                for (var i = 0; i < this.symbolArray.length; i++) {
+                    if(this.symbolArray[i].scopeNumber == this.scopeNumber) {
+                        this.curScopeNode = this.symbolArray[i];
+                    }
+                }
             }
 
             if(node.getName() == "VarDecl") {
@@ -107,7 +113,7 @@ module Compiler {
                     this.LoadAccWithConst(memLocation);
                     // 8D TX XX
                     this.StoreAccInMem(varName);
-                } else if(varType = "boolean") {
+                } else if(varType == "boolean") {
                     // Store the address of true and false into accumulator
                     // Location of true string in heap is 251
                     // Location of false string in heap is 245
@@ -188,13 +194,8 @@ module Compiler {
         public getType(varName: string, scopeNumber: number, node: ScopeNode): string {
             var retVal: string = null;
             var tempNode: ScopeNode = null;
-            for (var i = 0; i < this.symbolArray.length; i++) {
-                if(this.symbolArray[i].scopeNumber == scopeNumber) {
-                    tempNode = this.symbolArray[i];
-                    break;
-                }
-            }
-
+            tempNode = this.curScopeNode;
+            retVal = tempNode.getSymbol(varName).type;
             //retVal = tempNode.getSymbol(varName).type;
             while(!retVal && tempNode != this.symbolTable.getRoot()) {
                 tempNode = tempNode.parent;
@@ -331,7 +332,13 @@ module Compiler {
         // EC XX XX - compare memory to x register
         public CompareMemoryToXReg(varName: string): void {
             this.addByte(new Byte("EC"), this.index, false);
-            var tempVar = this.checkStaticTable(varName);
+            var tempVar;
+            if(varName == "TT") {
+                tempVar = new StaticVar(this.StaticVarCount, null, null);
+                tempVar.tempName = "TT";
+            } else {
+                tempVar = this.checkStaticTable(varName);
+            }
             var tempByte = new Byte(tempVar.tempName);
             tempByte.isTempVar = true;
             this.addByte(tempByte, this.index, false);

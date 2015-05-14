@@ -52,6 +52,11 @@ var Compiler;
                 this.scopeNumber++;
                 // Need to keep track of the amount of bytes in a block for jump
                 this.JumpOffset = this.index;
+                for (var i = 0; i < this.symbolArray.length; i++) {
+                    if (this.symbolArray[i].scopeNumber == this.scopeNumber) {
+                        this.curScopeNode = this.symbolArray[i];
+                    }
+                }
             }
             if (node.getName() == "VarDecl") {
                 var varName = node.getChildren()[1].getName();
@@ -93,7 +98,7 @@ var Compiler;
                     // 8D TX XX
                     this.StoreAccInMem(varName);
                 }
-                else if (varType = "boolean") {
+                else if (varType == "boolean") {
                     // Store the address of true and false into accumulator
                     // Location of true string in heap is 251
                     // Location of false string in heap is 245
@@ -167,12 +172,8 @@ var Compiler;
         CodeGeneration.prototype.getType = function (varName, scopeNumber, node) {
             var retVal = null;
             var tempNode = null;
-            for (var i = 0; i < this.symbolArray.length; i++) {
-                if (this.symbolArray[i].scopeNumber == scopeNumber) {
-                    tempNode = this.symbolArray[i];
-                    break;
-                }
-            }
+            tempNode = this.curScopeNode;
+            retVal = tempNode.getSymbol(varName).type;
             //retVal = tempNode.getSymbol(varName).type;
             while (!retVal && tempNode != this.symbolTable.getRoot()) {
                 tempNode = tempNode.parent;
@@ -296,7 +297,14 @@ var Compiler;
         // EC XX XX - compare memory to x register
         CodeGeneration.prototype.CompareMemoryToXReg = function (varName) {
             this.addByte(new Byte("EC"), this.index, false);
-            var tempVar = this.checkStaticTable(varName);
+            var tempVar;
+            if (varName == "TT") {
+                tempVar = new StaticVar(this.StaticVarCount, null, null);
+                tempVar.tempName = "TT";
+            }
+            else {
+                tempVar = this.checkStaticTable(varName);
+            }
             var tempByte = new Byte(tempVar.tempName);
             tempByte.isTempVar = true;
             this.addByte(tempByte, this.index, false);
