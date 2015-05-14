@@ -60,10 +60,10 @@ var Compiler;
                 }
             }
             if (this.passSemanticAnalysis) {
-                CODE_GEN = new Compiler.CodeGeneration(SYMBOL_TABLE);
-                CODE_GEN.toExecutableImage(AST.getRootNode());
-                this.displayCodeGen(CODE_GEN.ExecutableImage);
                 try {
+                    CODE_GEN = new Compiler.CodeGeneration(SYMBOL_TABLE);
+                    CODE_GEN.toExecutableImage(AST.getRootNode());
+                    this.displayCodeGen(CODE_GEN.ExecutableImage);
                 }
                 catch (e) {
                     this.stdErr("CODE_GENERATION", e);

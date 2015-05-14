@@ -132,7 +132,11 @@ module Compiler {
                 
                 if(varType == "int") {
                     if(node.getChildren()[1].getName() == "+") {
+                        // clear TS
+                        this.LoadAccWithConst("00");
+                        this.StoreAccInMem("TS");
                         this.generateIntExpr(node.getChildren()[1]);
+                        this.LoadAccFromMem("TS");
                         this.StoreAccInMem(this.findStaticVar(varName));
                     } else {
                         var value = node.getChildren()[1].getName();
@@ -282,6 +286,9 @@ module Compiler {
             // Add a TEMP address for comparison
             var newTempStaticVar = new StaticVar(this.StaticVarCount++, null, null);
             newTempStaticVar.tempName = "TT";
+            this.StaticTable[newTempStaticVar.tempName] = newTempStaticVar;
+            newTempStaticVar = new StaticVar(this.StaticVarCount++, null, null);
+            newTempStaticVar.tempName = "TS";
             this.StaticTable[newTempStaticVar.tempName] = newTempStaticVar;
             // Print the static
             for (var key in this.StaticTable) {
@@ -516,7 +523,6 @@ module Compiler {
             var secondOperand = node.getChildren()[1];
             if(secondOperand.getName() == "+"){
                 this.generateIntExpr(secondOperand);
-                this.StoreAccInMem("TT");
             } else {
                 if(firstOperand.getName().match(/^[a-z]$/g)) {
                     this.LoadAccFromMem(this.findStaticVar(firstOperand.getName()));
@@ -531,6 +537,10 @@ module Compiler {
                     this.LoadAccWithConst(secondOperand.getName());
                     this.AddWithCarry("TT");
                 }
+
+                // ACC has the sum
+                this.AddWithCarry("TS");
+                this.StoreAccInMem("TS");
             }
         }
     }
