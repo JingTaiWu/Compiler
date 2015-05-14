@@ -160,13 +160,11 @@ var Compiler;
             }
             if (node.getName() == "IfStatement") {
                 if (node.getChildren()[0].getName() == "==") {
-                    console.log("== detected!");
                     this.generateEquality(node.getChildren()[0]);
                 }
             }
             if (node.getName() == "WhileStatement") {
                 if (node.getChildren()[0].getName() == "==") {
-                    console.log("== detected!");
                     this.generateEquality(node.getChildren()[0]);
                 }
             }
@@ -258,8 +256,6 @@ var Compiler;
             for (var i = 0; i < this.ExecutableImage.length; i++) {
                 var tempByte = this.ExecutableImage[i];
                 if (tempByte.isTempVar) {
-                    console.log("Index " + i);
-                    console.log("Replacing " + tempByte.byte);
                     // Look up the variable in the static table and get the offset
                     var offset = this.StaticTable[tempByte.byte].offset + this.index + 1;
                     if (offset > 255) {
