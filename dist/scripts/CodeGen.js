@@ -13,6 +13,7 @@ var Compiler;
             this.StaticVarCount = 0;
             this.StaticTable = [];
             this.JumpTable = [];
+            this.JumpOffset = 0;
             this.scopeNumber = 0;
             this.index = 0;
             this.heapIndex = 255;
@@ -49,6 +50,8 @@ var Compiler;
             // traverse the AST
             if (node.getName() == "Block") {
                 this.scopeNumber++;
+                // Need to keep track of the amount of bytes in a block for jump
+                this.JumpOffset = this.index;
             }
             if (node.getName() == "VarDecl") {
                 var varName = node.getChildren()[1].getName();
@@ -56,7 +59,7 @@ var Compiler;
                 if (node.getChildren()[0].getName() == "int") {
                     // Machine code for integer declaration:
                     // A9 00 -> Store ACC with constant 00 (default value for int)
-                    this.StoreAccWithConst("0");
+                    this.LoadAccWithConst("0");
                     // 8D TX XX -> Store the accumulator in memory (T0 XX represents a memory location in stack)
                     this.StoreAccInMem(varName);
                 }
@@ -67,7 +70,7 @@ var Compiler;
                 }
                 else if (node.getChildren()[0].getName() == "boolean") {
                     // default value for boolean is false
-                    this.StoreAccWithConst((245).toString(16));
+                    this.LoadAccWithConst((245).toString(16));
                     this.StoreAccInMem(varName);
                 }
             }
@@ -77,7 +80,7 @@ var Compiler;
                 if (varType == "int") {
                     var value = node.getChildren()[1].getName();
                     // A9 value -> Store ACC with the given constant
-                    this.StoreAccWithConst(value);
+                    this.LoadAccWithConst(value);
                     // 8D TX XX
                     this.StoreAccInMem(varName);
                 }
@@ -86,7 +89,7 @@ var Compiler;
                     var str = node.getChildren()[1].getChildren()[0].getName();
                     // A9 XX (XX is the starting location of the string)
                     var memLocation = this.StoreStringToHeap(str);
-                    this.StoreAccWithConst(memLocation);
+                    this.LoadAccWithConst(memLocation);
                     // 8D TX XX
                     this.StoreAccInMem(varName);
                 }
@@ -96,7 +99,7 @@ var Compiler;
                     // Location of false string in heap is 245
                     var address = (node.getChildren()[1].getName() == "true") ? 251 : 245;
                     var addressStr = address.toString(16);
-                    this.StoreAccWithConst(addressStr);
+                    this.LoadAccWithConst(addressStr);
                     this.StoreAccInMem(varName);
                 }
             }
@@ -124,11 +127,25 @@ var Compiler;
                 // Ends with a system call
                 this.SystemCall();
             }
+            if (node.getName() == "IfStatement") {
+                if (node.getChildren()[0].getName() == "==") {
+                    console.log("== detected!");
+                    this.generateEquality(node.getChildren()[0]);
+                }
+            }
+            if (node.getName() == "WhileStatement") {
+                this.generateEquality(node.getChildren()[0]);
+            }
             for (var i = 0; i < node.getChildren().length; i++) {
                 this.toMachineCode(node.getChildren()[i]);
             }
             if (node.getName() == "Block") {
+                // Calculate jump offset
+                if (this.JumpTable["J" + this.scopeNumber]) {
+                    this.JumpTable["J" + this.scopeNumber].distance = this.index - this.JumpOffset;
+                }
                 this.scopeNumber--;
+                this.JumpOffset = 0;
             }
         };
         CodeGeneration.prototype.addByte = function (byte, index, isAtHeap) {
@@ -159,7 +176,11 @@ var Compiler;
             //retVal = tempNode.getSymbol(varName).type;
             while (!retVal && tempNode != this.symbolTable.getRoot()) {
                 tempNode = tempNode.parent;
-                retVal = tempNode.getSymbol(varName).type;
+                if (tempNode) {
+                    if (tempNode.getSymbol(varName)) {
+                        retVal = tempNode.getSymbol(varName).type;
+                    }
+                }
             }
             return retVal;
         };
@@ -183,9 +204,16 @@ var Compiler;
         // After all the instructions have been set, we need to go back to the Temporary variables and replace them with
         // actual locations
         CodeGeneration.prototype.replaceTemp = function () {
+            // Add a TEMP address for comparison
+            var newTempStaticVar = new StaticVar(this.StaticVarCount++, null, null);
+            newTempStaticVar.tempName = "TT";
+            this.StaticTable[newTempStaticVar.tempName] = newTempStaticVar;
             // Print the static
             for (var key in this.StaticTable) {
                 console.log(this.StaticTable[key].tempName + " " + this.StaticTable[key].scope + " " + this.StaticTable[key].offset);
+            }
+            for (var key in this.JumpTable) {
+                console.log(this.JumpTable[key].tempName + " " + this.JumpTable[key].distance);
             }
             for (var i = 0; i < this.ExecutableImage.length; i++) {
                 var tempByte = this.ExecutableImage[i];
@@ -197,6 +225,11 @@ var Compiler;
                     }
                     // Convert offset to a hex string
                     var offsetString = offset.toString(16).toUpperCase();
+                    offsetString = (offsetString.length < 2) ? "0" + offsetString : offsetString;
+                    tempByte.byte = offsetString;
+                }
+                else if (tempByte.isJumpVar) {
+                    var offsetString = this.JumpTable[tempByte.byte].distance.toString(16).toUpperCase();
                     offsetString = (offsetString.length < 2) ? "0" + offsetString : offsetString;
                     tempByte.byte = offsetString;
                 }
@@ -214,14 +247,21 @@ var Compiler;
         // 8D TX XX - Store the accumulator in memory 
         CodeGeneration.prototype.StoreAccInMem = function (varName) {
             this.addByte(new Byte("8D"), this.index, false);
-            var tempVar = this.checkStaticTable(varName);
+            var tempVar;
+            if (varName == "TT") {
+                tempVar = new StaticVar(this.StaticVarCount, null, null);
+                tempVar.tempName = "TT";
+            }
+            else {
+                tempVar = this.checkStaticTable(varName);
+            }
             var tempByte = new Byte(tempVar.tempName);
             tempByte.isTempVar = true;
             this.addByte(tempByte, this.index, false);
             this.addByte(new Byte("00"), this.index, false);
         };
-        // A9 XX - Store accumulator with a constant
-        CodeGeneration.prototype.StoreAccWithConst = function (constant) {
+        // A9 XX - load accumulator with a constant
+        CodeGeneration.prototype.LoadAccWithConst = function (constant) {
             this.addByte(new Byte("A9"), this.index, false);
             this.addByte(new Byte(constant), this.index, false);
         };
@@ -244,6 +284,24 @@ var Compiler;
             this.addByte(new Byte("A0"), this.index, false);
             this.addByte(new Byte(constant), this.index, false);
         };
+        // D0 XX - branch if z flag is zero
+        CodeGeneration.prototype.BranchNotEqual = function () {
+            this.addByte(new Byte("D0"), this.index, false);
+            var jumpTemp = new JumpVar("J" + this.scopeNumber);
+            var tempByte = new Byte(jumpTemp.tempName);
+            tempByte.isJumpVar = true;
+            this.JumpTable[jumpTemp.tempName] = jumpTemp;
+            this.addByte(tempByte, this.index, false);
+        };
+        // EC XX XX - compare memory to x register
+        CodeGeneration.prototype.CompareMemoryToXReg = function (varName) {
+            this.addByte(new Byte("EC"), this.index, false);
+            var tempVar = this.checkStaticTable(varName);
+            var tempByte = new Byte(tempVar.tempName);
+            tempByte.isTempVar = true;
+            this.addByte(tempByte, this.index, false);
+            this.addByte(new Byte("00"), this.index, false);
+        };
         // FF - system call
         CodeGeneration.prototype.SystemCall = function () {
             this.addByte(new Byte("FF"), this.index, false);
@@ -259,6 +317,38 @@ var Compiler;
                 this.addByte(new Byte(hexVal), this.heapIndex, true);
             }
             return (this.heapIndex + 1).toString(16);
+        };
+        // generate boolean statement
+        CodeGeneration.prototype.generateEquality = function (node) {
+            var firstOperand = node.getChildren()[0];
+            var secondOperand = node.getChildren()[1];
+            // string to string comparison
+            if (firstOperand.getName() == "==" || secondOperand.getName() == "!=") {
+                throw "Nested boolean expr is not supported yet.";
+            }
+            else if (firstOperand.getName() == "StringExpr" && secondOperand.getName() == "StringExpr") {
+                var firstStr = firstOperand.getChildren()[0];
+                var secondStr = secondOperand.getChildren()[0];
+                // Going to cheat with javascript comparison
+                if (firstStr == secondStr) {
+                }
+            }
+            else if (firstOperand.getName() == "StringExpr" || secondOperand.getName() == "StringExpr") {
+                throw "ID to String comparison is not supported yet.";
+            }
+            else {
+                // all other comparison
+                if (firstOperand.getName().match(/^[0-9]$/g) && secondOperand.getName().match(/^[0-9]$/g)) {
+                    // Integer to Integer
+                    var firstInt = firstOperand.getName();
+                    var secondInt = secondOperand.getName();
+                    this.LoadXRegWithConst(firstInt);
+                    this.LoadAccWithConst(secondInt);
+                    this.StoreAccInMem("TT");
+                    this.CompareMemoryToXReg("TT");
+                    this.BranchNotEqual();
+                }
+            }
         };
         return CodeGeneration;
     })();
@@ -293,8 +383,8 @@ var Compiler;
     Compiler.StaticVar = StaticVar;
     // To keep track of the jump offset for branching
     var JumpVar = (function () {
-        function JumpVar(count) {
-            this.tempName = "J" + count;
+        function JumpVar(str) {
+            this.tempName = str;
         }
         return JumpVar;
     })();
