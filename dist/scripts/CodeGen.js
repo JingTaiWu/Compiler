@@ -165,7 +165,10 @@ var Compiler;
                 }
             }
             if (node.getName() == "WhileStatement") {
-                this.generateEquality(node.getChildren()[0]);
+                if (node.getChildren()[0].getName() == "==") {
+                    console.log("== detected!");
+                    this.generateEquality(node.getChildren()[0]);
+                }
             }
             for (var i = 0; i < node.getChildren().length; i++) {
                 this.toMachineCode(node.getChildren()[i]);
@@ -220,12 +223,6 @@ var Compiler;
         // and return it
         CodeGeneration.prototype.addToStaticTable = function (varName) {
             var retVal = null;
-            // for(var key in this.StaticTable) {
-            //     var entry = this.StaticTable[key];
-            //     if(entry.variable == varName) {
-            //         retVal = entry;
-            //     }
-            // }
             retVal = new StaticVar(this.StaticVarCount++, varName, this.scopeNumber);
             this.StaticTable[retVal.tempName] = retVal;
             this.currentNode.members[varName] = retVal;
@@ -292,14 +289,6 @@ var Compiler;
         // 8D TX XX - Store the accumulator in memory 
         CodeGeneration.prototype.StoreAccInMem = function (varName) {
             this.addByte(new Byte("8D"), this.index, false);
-            // var tempVar: StaticVar;
-            // if(varName == "TT") {
-            //     tempVar = new StaticVar(this.StaticVarCount, null, null);
-            //     tempVar.tempName = "TT";
-            // } else {
-            //     tempVar = this.checkStaticTable(varName);
-            // }
-            // var tempByte = new Byte(tempVar.tempName);
             var tempByte = new Byte(varName);
             tempByte.isTempVar = true;
             this.addByte(tempByte, this.index, false);
@@ -313,14 +302,6 @@ var Compiler;
         // AC TX XX - load Y register from memory
         CodeGeneration.prototype.LoadYRegFromMem = function (varName) {
             this.addByte(new Byte("AC"), this.index, false);
-            // var tempVar;
-            // if(varName == "TT") {
-            //     tempVar = new StaticVar(this.StaticVarCount, null, null);
-            //     tempVar.tempName = "TT";
-            // } else {
-            //     tempVar = this.checkStaticTable(varName);
-            // }
-            // var tempByte = new Byte(tempVar.tempName);
             var tempByte = new Byte(varName);
             tempByte.isTempVar = true;
             this.addByte(tempByte, this.index, false);
@@ -339,14 +320,6 @@ var Compiler;
         // AE XX XX - load X register from memory
         CodeGeneration.prototype.LoadXRegFromMem = function (varName) {
             this.addByte(new Byte("AE"), this.index, false);
-            // var tempVar;
-            // if(varName == "TT") {
-            //     tempVar = new StaticVar(this.StaticVarCount, null, null);
-            //     tempVar.tempName = "TT";
-            // } else {
-            //     tempVar = this.checkStaticTable(varName);
-            // }
-            //var tempByte = new Byte(tempVar.tempName);
             var tempByte = new Byte(varName);
             tempByte.isTempVar = true;
             this.addByte(tempByte, this.index, false);
@@ -364,14 +337,14 @@ var Compiler;
         // EC XX XX - compare memory to x register
         CodeGeneration.prototype.CompareMemoryToXReg = function (varName) {
             this.addByte(new Byte("EC"), this.index, false);
-            // var tempVar;
-            // if(varName == "TT") {
-            //     tempVar = new StaticVar(this.StaticVarCount, null, null);
-            //     tempVar.tempName = "TT";
-            // } else {
-            //     tempVar = this.checkStaticTable(varName);
-            // }
-            // var tempByte = new Byte(tempVar.tempName);
+            var tempByte = new Byte(varName);
+            tempByte.isTempVar = true;
+            this.addByte(tempByte, this.index, false);
+            this.addByte(new Byte("00"), this.index, false);
+        };
+        // 6D - Add with carry
+        CodeGeneration.prototype.AddWithCarry = function (varName) {
+            this.addByte(new Byte("6D"), this.index, false);
             var tempByte = new Byte(varName);
             tempByte.isTempVar = true;
             this.addByte(tempByte, this.index, false);
@@ -437,7 +410,36 @@ var Compiler;
                     this.CompareMemoryToXReg(this.findStaticVar(secondOperand.getName()));
                     this.BranchNotEqual();
                 }
+                else if (firstOperand.getName().match(/^[a-z]$/g) && secondOperand.getName().match(/^((true)|(false))$/g)) {
+                    // ID to boolean
+                    if (secondOperand.getName() == "true") {
+                        this.LoadAccWithConst("FB");
+                    }
+                    else {
+                        this.LoadAccWithConst("F5");
+                    }
+                    this.StoreAccInMem("TT");
+                    this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
+                    this.CompareMemoryToXReg("TT");
+                    this.BranchNotEqual();
+                }
+                else if (secondOperand.getName().match(/^[a-z]$/g) && firstOperand.getName().match(/^((true)|(false))$/g)) {
+                    if (firstOperand.getName() == "true") {
+                        this.LoadAccWithConst("FB");
+                    }
+                    else {
+                        this.LoadAccWithConst("F5");
+                    }
+                    this.StoreAccInMem("TT");
+                    this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
+                    this.CompareMemoryToXReg("TT");
+                    this.BranchNotEqual();
+                }
             }
+        };
+        // Basically nagate equality
+        CodeGeneration.prototype.generateInequality = function (node) {
+            this.generateEquality(node);
         };
         return CodeGeneration;
     })();
