@@ -410,28 +410,48 @@ var Compiler;
                     this.CompareMemoryToXReg(this.findStaticVar(secondOperand.getName()));
                     this.BranchNotEqual();
                 }
-                else if (firstOperand.getName().match(/^[a-z]$/g) && secondOperand.getName().match(/^((true)|(false))$/g)) {
+                else if (firstOperand.getName().match(/^((true)|(false))$/g) || secondOperand.getName().match(/^((true)|(false))$/g)) {
                     // ID to boolean
-                    if (secondOperand.getName() == "true") {
-                        this.LoadAccWithConst("FB");
+                    if (firstOperand.getName().match(/^((true)|(false))$/g)) {
+                        if (firstOperand.getName() == "true") {
+                            this.LoadAccWithConst("FB");
+                        }
+                        else {
+                            this.LoadAccWithConst("F5");
+                        }
                     }
                     else {
-                        this.LoadAccWithConst("F5");
+                        if (secondOperand.getName() == "true") {
+                            this.LoadAccWithConst("FB");
+                        }
+                        else {
+                            this.LoadAccWithConst("F5");
+                        }
                     }
                     this.StoreAccInMem("TT");
-                    this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
+                    if (firstOperand.getName().match(/^[a-z]$/g)) {
+                        this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
+                    }
+                    else {
+                        this.LoadXRegFromMem(this.findStaticVar(secondOperand.getName()));
+                    }
                     this.CompareMemoryToXReg("TT");
                     this.BranchNotEqual();
                 }
-                else if (secondOperand.getName().match(/^[a-z]$/g) && firstOperand.getName().match(/^((true)|(false))$/g)) {
-                    if (firstOperand.getName() == "true") {
-                        this.LoadAccWithConst("FB");
+                else if (firstOperand.getName().match(/^[0-9]$/g) || secondOperand.getName().match(/^[0-9]$/g)) {
+                    if (firstOperand.getName().match(/^[a-z]$/g)) {
+                        this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
                     }
                     else {
-                        this.LoadAccWithConst("F5");
+                        this.LoadXRegFromMem(this.findStaticVar(secondOperand.getName()));
+                    }
+                    if (firstOperand.getName().match(/^[0-9]$/g)) {
+                        this.LoadAccWithConst(firstOperand.getName());
+                    }
+                    else {
+                        this.LoadAccWithConst(secondOperand.getName());
                     }
                     this.StoreAccInMem("TT");
-                    this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
                     this.CompareMemoryToXReg("TT");
                     this.BranchNotEqual();
                 }
