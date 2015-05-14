@@ -17,7 +17,7 @@ module Compiler {
         private index: number;
         private heapIndex: number;
         private symbolTable: SymbolTable;
-        private symbolArray: ScopeNode[];
+        private symbolArray;
         private curScopeNode: ScopeNode;
         constructor(symbolTable: SymbolTable) {
             this.ExecutableImage = [];
@@ -195,14 +195,14 @@ module Compiler {
             var retVal: string = null;
             var tempNode: ScopeNode = null;
             tempNode = this.curScopeNode;
-            retVal = tempNode.getSymbol(varName).type;
-            //retVal = tempNode.getSymbol(varName).type;
-            while(!retVal && tempNode != this.symbolTable.getRoot()) {
-                tempNode = tempNode.parent;
+            while(!retVal || tempNode != this.symbolTable.getRoot()) {
                 if(tempNode) {
                     if(tempNode.getSymbol(varName)) {
                         retVal = tempNode.getSymbol(varName).type;
                     } 
+                }
+                if(tempNode.parent) {
+                    tempNode = tempNode.parent;
                 }  
             }
 
@@ -300,7 +300,13 @@ module Compiler {
         // AC TX XX - load Y register from memory
         public LoadYRegFromMem(varName: string): void {
             this.addByte(new Byte("AC"), this.index, false);
-            var tempVar = this.checkStaticTable(varName);
+            var tempVar;
+            if(varName == "TT") {
+                tempVar = new StaticVar(this.StaticVarCount, null, null);
+                tempVar.tempName = "TT";
+            } else {
+                tempVar = this.checkStaticTable(varName);
+            }
             var tempByte = new Byte(tempVar.tempName);
             tempByte.isTempVar = true;
             this.addByte(tempByte, this.index, false);
@@ -317,6 +323,22 @@ module Compiler {
         public LoadYRegWithConst(constant: string): void {
             this.addByte(new Byte("A0"), this.index, false);
             this.addByte(new Byte(constant), this.index, false);
+        }
+
+        // AE XX XX - load X register from memory
+        public LoadXRegFromMem(varName: string): void {
+            this.addByte(new Byte("AE"), this.index, false);
+            var tempVar;
+            if(varName == "TT") {
+                tempVar = new StaticVar(this.StaticVarCount, null, null);
+                tempVar.tempName = "TT";
+            } else {
+                tempVar = this.checkStaticTable(varName);
+            }
+            var tempByte = new Byte(tempVar.tempName);
+            tempByte.isTempVar = true;
+            this.addByte(tempByte, this.index, false);
+            this.addByte(new Byte("00"), this.index, false);
         }
 
         // D0 XX - branch if z flag is zero
@@ -396,6 +418,11 @@ module Compiler {
                     this.LoadAccWithConst(secondInt);
                     this.StoreAccInMem("TT");
                     this.CompareMemoryToXReg("TT");
+                    this.BranchNotEqual();
+                } else if(firstOperand.getName().match(/^[a-z]$/g) && secondOperand.getName().match(/^[a-z]$/g)) {
+                    // ID to ID
+                    this.LoadXRegFromMem(firstOperand.getName());
+                    this.CompareMemoryToXReg(secondOperand.getName());
                     this.BranchNotEqual();
                 }
             }
