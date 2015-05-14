@@ -11,10 +11,12 @@ module Compiler {
         private StaticTable: StaticVar[];
         private StaticVarCount: number;
         private JumpTable: JumpVar[];
+        private JumpVarCount: number;
         private scopeNumber: number;
         private index: number;
         private heapIndex: number;
         private symbolTable: SymbolTable;
+        private symbolArray: ScopeNode[];
         constructor(symbolTable: SymbolTable) {
             this.ExecutableImage = [];
             this.ImageSize = 256;
@@ -24,7 +26,17 @@ module Compiler {
             this.scopeNumber = 0;
             this.index = 0;
             this.heapIndex = 255;
+            this.JumpVarCount = 0;
             this.symbolTable = symbolTable;
+            this.symbolArray = [];
+            this.tableToArray(this.symbolTable.getRoot());
+        }
+
+        public tableToArray(node: ScopeNode) {
+            this.symbolArray.push(node);
+            for (var i = 0; i < node.getChildren().length; i++) {
+                this.tableToArray(node.getChildren()[i]);
+            }
         }
 
         public toExecutableImage(node: Node): void {
@@ -68,7 +80,6 @@ module Compiler {
                     this.checkStaticTable(varName);
                 } else if(node.getChildren()[0].getName() == "boolean") {
                     // default value for boolean is false
-                    console.log((245).toString(16));
                     this.StoreAccWithConst((245).toString(16));
                     this.StoreAccInMem(varName);
                 }
@@ -120,7 +131,6 @@ module Compiler {
                     // Case 2: string literal
                     var strLit = node.getChildren()[0].getChildren()[0].getName();
                     var memoryLocation = this.StoreStringToHeap(strLit);
-                    console.log("Printing String Lit: " + strLit);
                     this.LoadYRegWithConst(memoryLocation);
                     this.LoadXRegWithConst("02");
                 }
@@ -158,23 +168,20 @@ module Compiler {
         public getType(varName: string, scopeNumber: number, node: ScopeNode): string {
             var retVal: string = null;
             var tempNode: ScopeNode = null;
-            findNode(scopeNumber, node);
-            retVal = tempNode.getSymbol(varName).type;
+            for (var i = 0; i < this.symbolArray.length; i++) {
+                if(this.symbolArray[i].scopeNumber == scopeNumber) {
+                    tempNode = this.symbolArray[i];
+                    break;
+                }
+            }
+
+            //retVal = tempNode.getSymbol(varName).type;
             while(!retVal && tempNode != this.symbolTable.getRoot()) {
                 tempNode = tempNode.parent;
                 retVal = tempNode.getSymbol(varName).type;
             }
 
             return retVal;
-
-            function findNode(scopeNumber: number, node: ScopeNode) {
-                if(node.scopeNumber == scopeNumber) {
-                    tempNode = node;
-                }
-                for (var i = 0; i < node.getChildren().length; i++) {
-                    findNode(scopeNumber, node.getChildren()[i]);
-                }
-            }
         }
 
         // checkStaticTable - check to see if the variable already exist in the
@@ -185,7 +192,7 @@ module Compiler {
 
             for(var key in this.StaticTable) {
                 var entry = this.StaticTable[key];
-                if(entry.variable == varName && entry.scope == this.scopeNumber) {
+                if(entry.variable == varName) {
                     retVal = entry;
                 }
             }
@@ -201,9 +208,9 @@ module Compiler {
         // actual locations
         public replaceTemp(): void {
             // Print the static
-            // for (var key in this.StaticTable) {
-            //     console.log(this.StaticTable[key].tempName + " " + this.StaticTable[key].scope + " " + this.StaticTable[key].offset);
-            // }
+            for (var key in this.StaticTable) {
+                console.log(this.StaticTable[key].tempName + " " + this.StaticTable[key].scope + " " + this.StaticTable[key].offset);
+            }
 
             for (var i = 0; i < this.ExecutableImage.length; i++) {
                 var tempByte = this.ExecutableImage[i];
@@ -324,7 +331,11 @@ module Compiler {
 
     // To keep track of the jump offset for branching
     export class JumpVar {
-        public temp: string;
+        public tempName: string;
         public distance: number;
+
+        constructor(count: number) {
+            this.tempName = "J" + count;
+        }
     }
 }

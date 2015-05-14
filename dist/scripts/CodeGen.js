@@ -16,8 +16,17 @@ var Compiler;
             this.scopeNumber = 0;
             this.index = 0;
             this.heapIndex = 255;
+            this.JumpVarCount = 0;
             this.symbolTable = symbolTable;
+            this.symbolArray = [];
+            this.tableToArray(this.symbolTable.getRoot());
         }
+        CodeGeneration.prototype.tableToArray = function (node) {
+            this.symbolArray.push(node);
+            for (var i = 0; i < node.getChildren().length; i++) {
+                this.tableToArray(node.getChildren()[i]);
+            }
+        };
         CodeGeneration.prototype.toExecutableImage = function (node) {
             // Write true and false to heap
             // Location of true in heap is 251
@@ -58,7 +67,6 @@ var Compiler;
                 }
                 else if (node.getChildren()[0].getName() == "boolean") {
                     // default value for boolean is false
-                    console.log((245).toString(16));
                     this.StoreAccWithConst((245).toString(16));
                     this.StoreAccInMem(varName);
                 }
@@ -110,7 +118,6 @@ var Compiler;
                     // Case 2: string literal
                     var strLit = node.getChildren()[0].getChildren()[0].getName();
                     var memoryLocation = this.StoreStringToHeap(strLit);
-                    console.log("Printing String Lit: " + strLit);
                     this.LoadYRegWithConst(memoryLocation);
                     this.LoadXRegWithConst("02");
                 }
@@ -143,21 +150,18 @@ var Compiler;
         CodeGeneration.prototype.getType = function (varName, scopeNumber, node) {
             var retVal = null;
             var tempNode = null;
-            findNode(scopeNumber, node);
-            retVal = tempNode.getSymbol(varName).type;
+            for (var i = 0; i < this.symbolArray.length; i++) {
+                if (this.symbolArray[i].scopeNumber == scopeNumber) {
+                    tempNode = this.symbolArray[i];
+                    break;
+                }
+            }
+            //retVal = tempNode.getSymbol(varName).type;
             while (!retVal && tempNode != this.symbolTable.getRoot()) {
                 tempNode = tempNode.parent;
                 retVal = tempNode.getSymbol(varName).type;
             }
             return retVal;
-            function findNode(scopeNumber, node) {
-                if (node.scopeNumber == scopeNumber) {
-                    tempNode = node;
-                }
-                for (var i = 0; i < node.getChildren().length; i++) {
-                    findNode(scopeNumber, node.getChildren()[i]);
-                }
-            }
         };
         // checkStaticTable - check to see if the variable already exist in the
         // static table. If yes, just return the entry. If not, create a new instance
@@ -166,7 +170,7 @@ var Compiler;
             var retVal = null;
             for (var key in this.StaticTable) {
                 var entry = this.StaticTable[key];
-                if (entry.variable == varName && entry.scope == this.scopeNumber) {
+                if (entry.variable == varName) {
                     retVal = entry;
                 }
             }
@@ -180,9 +184,9 @@ var Compiler;
         // actual locations
         CodeGeneration.prototype.replaceTemp = function () {
             // Print the static
-            // for (var key in this.StaticTable) {
-            //     console.log(this.StaticTable[key].tempName + " " + this.StaticTable[key].scope + " " + this.StaticTable[key].offset);
-            // }
+            for (var key in this.StaticTable) {
+                console.log(this.StaticTable[key].tempName + " " + this.StaticTable[key].scope + " " + this.StaticTable[key].offset);
+            }
             for (var i = 0; i < this.ExecutableImage.length; i++) {
                 var tempByte = this.ExecutableImage[i];
                 if (tempByte.isTempVar) {
@@ -289,7 +293,8 @@ var Compiler;
     Compiler.StaticVar = StaticVar;
     // To keep track of the jump offset for branching
     var JumpVar = (function () {
-        function JumpVar() {
+        function JumpVar(count) {
+            this.tempName = "J" + count;
         }
         return JumpVar;
     })();
