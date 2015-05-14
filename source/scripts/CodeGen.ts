@@ -131,11 +131,16 @@ module Compiler {
                 var varType = this.getType(varName, this.scopeNumber, this.symbolTable.getRoot());
                 
                 if(varType == "int") {
-                    var value = node.getChildren()[1].getName();
-                    // A9 value -> Store ACC with the given constant
-                    this.LoadAccWithConst(value);
-                    // 8D TX XX
-                    this.StoreAccInMem(this.findStaticVar(varName));
+                    if(node.getChildren()[1].getName() == "+") {
+                        this.generateIntExpr(node.getChildren()[1]);
+                        this.StoreAccInMem(this.findStaticVar(varName));
+                    } else {
+                        var value = node.getChildren()[1].getName();
+                        // A9 value -> Store ACC with the given constant
+                        this.LoadAccWithConst(value);
+                        // 8D TX XX
+                        this.StoreAccInMem(this.findStaticVar(varName));
+                    }             
                 } else if(varType == "string") {
                     // for string assignment, write the characters to heap
                     var str = node.getChildren()[1].getChildren()[0].getName();
@@ -332,6 +337,15 @@ module Compiler {
             this.addByte(new Byte(constant), this.index, false);
         }
 
+        // AD XX XX - load accumulator from memory
+        public LoadAccFromMem(varName: string): void {
+            this.addByte(new Byte("AD"), this.index, false);
+            var tempByte = new Byte(varName);
+            tempByte.isTempVar = true;
+            this.addByte(tempByte, this.index, false);
+            this.addByte(new Byte("00"), this.index, false);
+        }
+
         // AC TX XX - load Y register from memory
         public LoadYRegFromMem(varName: string): void {
             this.addByte(new Byte("AC"), this.index, false);
@@ -494,6 +508,30 @@ module Compiler {
         public generateInequality(node: Node): void {
             this.generateEquality(node);
             
+        }
+
+        // Generate integer expression
+        public generateIntExpr(node: Node): void {
+            var firstOperand = node.getChildren()[0];
+            var secondOperand = node.getChildren()[1];
+            if(secondOperand.getName() == "+"){
+                this.generateIntExpr(secondOperand);
+                this.StoreAccInMem("TT");
+            } else {
+                if(firstOperand.getName().match(/^[a-z]$/g)) {
+                    this.LoadAccFromMem(this.findStaticVar(firstOperand.getName()));
+                } else {
+                    this.LoadAccWithConst(firstOperand.getName());
+                }
+
+                if(secondOperand.getName().match(/^[a-z]$/g)) {
+                    this.AddWithCarry(this.findStaticVar(secondOperand.getName()));
+                } else {
+                    this.StoreAccInMem("TT");
+                    this.LoadAccWithConst(secondOperand.getName());
+                    this.AddWithCarry("TT");
+                }
+            }
         }
     }
 

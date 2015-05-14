@@ -109,11 +109,17 @@ var Compiler;
                 var varName = node.getChildren()[0].getName();
                 var varType = this.getType(varName, this.scopeNumber, this.symbolTable.getRoot());
                 if (varType == "int") {
-                    var value = node.getChildren()[1].getName();
-                    // A9 value -> Store ACC with the given constant
-                    this.LoadAccWithConst(value);
-                    // 8D TX XX
-                    this.StoreAccInMem(this.findStaticVar(varName));
+                    if (node.getChildren()[1].getName() == "+") {
+                        this.generateIntExpr(node.getChildren()[1]);
+                        this.StoreAccInMem(this.findStaticVar(varName));
+                    }
+                    else {
+                        var value = node.getChildren()[1].getName();
+                        // A9 value -> Store ACC with the given constant
+                        this.LoadAccWithConst(value);
+                        // 8D TX XX
+                        this.StoreAccInMem(this.findStaticVar(varName));
+                    }
                 }
                 else if (varType == "string") {
                     // for string assignment, write the characters to heap
@@ -295,6 +301,14 @@ var Compiler;
             this.addByte(new Byte("A9"), this.index, false);
             this.addByte(new Byte(constant), this.index, false);
         };
+        // AD XX XX - load accumulator from memory
+        CodeGeneration.prototype.LoadAccFromMem = function (varName) {
+            this.addByte(new Byte("AD"), this.index, false);
+            var tempByte = new Byte(varName);
+            tempByte.isTempVar = true;
+            this.addByte(tempByte, this.index, false);
+            this.addByte(new Byte("00"), this.index, false);
+        };
         // AC TX XX - load Y register from memory
         CodeGeneration.prototype.LoadYRegFromMem = function (varName) {
             this.addByte(new Byte("AC"), this.index, false);
@@ -456,6 +470,31 @@ var Compiler;
         // Basically nagate equality
         CodeGeneration.prototype.generateInequality = function (node) {
             this.generateEquality(node);
+        };
+        // Generate integer expression
+        CodeGeneration.prototype.generateIntExpr = function (node) {
+            var firstOperand = node.getChildren()[0];
+            var secondOperand = node.getChildren()[1];
+            if (secondOperand.getName() == "+") {
+                this.generateIntExpr(secondOperand);
+                this.StoreAccInMem("TT");
+            }
+            else {
+                if (firstOperand.getName().match(/^[a-z]$/g)) {
+                    this.LoadAccFromMem(this.findStaticVar(firstOperand.getName()));
+                }
+                else {
+                    this.LoadAccWithConst(firstOperand.getName());
+                }
+                if (secondOperand.getName().match(/^[a-z]$/g)) {
+                    this.AddWithCarry(this.findStaticVar(secondOperand.getName()));
+                }
+                else {
+                    this.StoreAccInMem("TT");
+                    this.LoadAccWithConst(secondOperand.getName());
+                    this.AddWithCarry("TT");
+                }
+            }
         };
         return CodeGeneration;
     })();
