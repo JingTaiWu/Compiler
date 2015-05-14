@@ -27,7 +27,6 @@ var Compiler;
                 this.addByte(new Byte("00"), this.heapIndex, true);
                 for (var i = boolVal[j].length - 1; i > -1; i--) {
                     var hexVal = boolVal[j].charCodeAt(i).toString(16);
-                    hexVal = (hexVal.length < 2) ? "0" + hexVal : hexVal;
                     this.addByte(new Byte(hexVal), this.heapIndex, true);
                 }
             }
@@ -49,21 +48,16 @@ var Compiler;
                 if (node.getChildren()[0].getName() == "int") {
                     // Machine code for integer declaration:
                     // A9 00 -> Store ACC with constant 00 (default value for int)
-                    this.addByte(new Byte("A9"), this.index, false);
-                    this.addByte(new Byte("00"), this.index, false);
+                    this.StoreAccWithConst("0");
                     // 8D TX XX -> Store the accumulator in memory (T0 XX represents a memory location in stack)
-                    this.addByte(new Byte("8D"), this.index, false);
-                    // Check the static table for the variable
-                    var tempVar = this.checkStaticTable(varName);
-                    var tempByte = new Byte(tempVar.tempName);
-                    tempByte.isTempVar = true;
-                    this.addByte(tempByte, this.index, false);
-                    this.addByte(new Byte("00"), this.index, false);
+                    this.StoreAccInMem(varName);
                 }
                 else if (node.getChildren()[0].getName() == "string") {
                     // String
                     // For a string declaration, simply add an entry to the static table
                     this.checkStaticTable(varName);
+                }
+                else if (node.getChildren()[0].getName() == "boolean") {
                 }
             }
             if (node.getName() == "AssignmentStatement") {
@@ -71,20 +65,10 @@ var Compiler;
                 var varType = this.getType(varName, this.scopeNumber, this.symbolTable.getRoot());
                 if (varType == "int") {
                     var value = node.getChildren()[1].getName();
-                    // Pad the 0 for numbers
-                    if (value.length < 2) {
-                        value = "0" + value;
-                    }
                     // A9 value -> Store ACC with the given constant
-                    this.addByte(new Byte("A9"), this.index, false);
-                    this.addByte(new Byte(value), this.index, false);
+                    this.StoreAccWithConst(value);
                     // 8D TX XX
-                    this.addByte(new Byte("8D"), this.index, false);
-                    var tempVar = this.checkStaticTable(varName);
-                    var tempByte = new Byte(tempVar.tempName);
-                    tempByte.isTempVar = true;
-                    this.addByte(tempByte, this.index, false);
-                    this.addByte(new Byte("00"), this.index, false);
+                    this.StoreAccInMem(varName);
                 }
                 else if (varType == "string") {
                     // for string assignment, write the characters to heap
@@ -95,23 +79,22 @@ var Compiler;
                     this.addByte(new Byte("00"), this.heapIndex, true);
                     for (var i = str.length - 1; i > -1; i--) {
                         var hexVal = str.charCodeAt(i).toString(16);
-                        hexVal = (hexVal.length < 2) ? "0" + hexVal : hexVal;
                         this.addByte(new Byte(hexVal), this.heapIndex, true);
                     }
                     // A9 XX (XX is the starting location of the string)
-                    this.addByte(new Byte("A9"), this.index, false);
                     var memLocation = (this.heapIndex + 1).toString(16);
-                    memLocation = (memLocation.length < 2) ? "0" + memLocation : memLocation;
-                    this.addByte(new Byte(memLocation), this.index, false);
+                    this.StoreAccWithConst(memLocation);
                     // 8D TX XX
-                    this.addByte(new Byte("8D"), this.index, false);
-                    var tempVar = this.checkStaticTable(varName);
-                    var tempByte = new Byte(tempVar.tempName);
-                    tempByte.isTempVar = true;
-                    this.addByte(tempByte, this.index, false);
-                    this.addByte(new Byte("00"), this.index, false);
+                    this.StoreAccInMem(varName);
                 }
                 else if (varType = "boolean") {
+                    // Store the address of true and false into accumulator
+                    // Location of true string in heap is 251
+                    // Location of false string in heap is 245
+                    var address = (node.getChildren()[1].getName() == "true") ? 251 : 245;
+                    var addressStr = address.toString(16);
+                    this.StoreAccWithConst(addressStr);
+                    this.StoreAccInMem(varName);
                 }
             }
             if (node.getName() == "PrintStatement") {
@@ -121,22 +104,12 @@ var Compiler;
                     // AC TX XX - Load Y Reg from mem
                     // A2 01 - Load X Reg with constant
                     // FF - System call
-                    var tempVar = this.checkStaticTable(varName);
-                    this.addByte(new Byte("AC"), this.index, false);
-                    var tempByte = new Byte(tempVar.tempName);
-                    tempByte.isTempVar = true;
-                    this.addByte(tempByte, this.index, false);
-                    this.addByte(new Byte("00"), this.index, false);
+                    this.LoadYRegFromMem(varName);
                     // If X register is 01, then prints a string from address stored in Y reg
                     // If X register is 02, print integer stored in Y reg
-                    this.addByte(new Byte("A2"), this.index, false);
-                    var varType = this.getType(tempVar.variable, this.scopeNumber, this.symbolTable.getRoot());
-                    if (varType == "int") {
-                        this.addByte(new Byte("01"), this.index, false);
-                    }
-                    else {
-                        this.addByte(new Byte("02"), this.index, false);
-                    }
+                    var varType = this.getType(node.getChildren()[0].getName(), this.scopeNumber, this.symbolTable.getRoot());
+                    var constant = (varType == "int") ? "01" : "02";
+                    this.LoadXRegWithConst(constant);
                 }
                 // Ends with a system call
                 this.addByte(new Byte("FF"), this.index, false);
@@ -156,7 +129,6 @@ var Compiler;
             if (this.ExecutableImage[index] != null) {
                 throw "Out of Stack Space.";
             }
-            byte.byte = byte.byte.toUpperCase();
             this.ExecutableImage[index] = byte;
             if (isAtHeap) {
                 this.heapIndex--;
@@ -231,6 +203,35 @@ var Compiler;
                 }
             }
         };
+        // Assmebly Instructions
+        // 8D TX XX - Store the accumulator in memory 
+        CodeGeneration.prototype.StoreAccInMem = function (varName) {
+            this.addByte(new Byte("8D"), this.index, false);
+            var tempVar = this.checkStaticTable(varName);
+            var tempByte = new Byte(tempVar.tempName);
+            tempByte.isTempVar = true;
+            this.addByte(tempByte, this.index, false);
+            this.addByte(new Byte("00"), this.index, false);
+        };
+        // A9 XX - Store accumulator with a constant
+        CodeGeneration.prototype.StoreAccWithConst = function (constant) {
+            this.addByte(new Byte("A9"), this.index, false);
+            this.addByte(new Byte(constant), this.index, false);
+        };
+        // AC TX XX - load Y register from memory
+        CodeGeneration.prototype.LoadYRegFromMem = function (varName) {
+            this.addByte(new Byte("AC"), this.index, false);
+            var tempVar = this.checkStaticTable(varName);
+            var tempByte = new Byte(tempVar.tempName);
+            tempByte.isTempVar = true;
+            this.addByte(tempByte, this.index, false);
+            this.addByte(new Byte("00"), this.index, false);
+        };
+        // A2 XX - load X Register with constant
+        CodeGeneration.prototype.LoadXRegWithConst = function (constant) {
+            this.addByte(new Byte("A2"), this.index, false);
+            this.addByte(new Byte(constant), this.index, false);
+        };
         return CodeGeneration;
     })();
     Compiler.CodeGeneration = CodeGeneration;
@@ -239,7 +240,14 @@ var Compiler;
         function Byte(byte) {
             this.isTempVar = false;
             this.isJumpVar = false;
-            this.byte = byte;
+            if (byte.length > 2) {
+                throw "Invalid Byte";
+            }
+            // Pad the string if it is less than size 2
+            if (byte.length < 2) {
+                byte = "0" + byte;
+            }
+            this.byte = byte.toUpperCase();
         }
         return Byte;
     })();
