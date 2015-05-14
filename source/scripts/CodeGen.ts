@@ -54,7 +54,6 @@ module Compiler {
             }
 
             if(node.getName() == "VarDecl") {
-                console.log("VarDecl");
                 var varName = node.getChildren()[1].getName();
                 // Integer
                 if(node.getChildren()[0].getName() == "int") {
@@ -86,17 +85,8 @@ module Compiler {
                 } else if(varType == "string") {
                     // for string assignment, write the characters to heap
                     var str = node.getChildren()[1].getChildren()[0].getName();
-                    // trim out the quotation marks
-                    str = str.substring(1, str.length - 1);
-                    // Add "00" to the end of string
-                    this.addByte(new Byte("00"), this.heapIndex, true);
-                    for (var i = str.length - 1; i > -1; i--) {
-                        var hexVal = str.charCodeAt(i).toString(16);
-                        this.addByte(new Byte(hexVal), this.heapIndex, true);
-                    }
-
                     // A9 XX (XX is the starting location of the string)
-                    var memLocation = (this.heapIndex + 1).toString(16);
+                    var memLocation = this.StoreStringToHeap(str);
                     this.StoreAccWithConst(memLocation);
                     // 8D TX XX
                     this.StoreAccInMem(varName);
@@ -124,10 +114,17 @@ module Compiler {
                     var varType = this.getType(node.getChildren()[0].getName(), this.scopeNumber, this.symbolTable.getRoot());
                     var constant = (varType == "int") ? "01" : "02";
                     this.LoadXRegWithConst(constant);
-                }
+                } else if(node.getChildren()[0].getName() == "StringExpr") {
+                    // Case 2: string literal
 
+                    var strLit = node.getChildren()[0].getChildren()[0].getName();
+                    var memoryLocation = this.StoreStringToHeap(strLit);
+                    console.log("Printing String Lit: " + strLit);
+                    this.LoadYRegWithConst(memoryLocation);
+                    this.LoadXRegWithConst("02");
+                }
                 // Ends with a system call
-                this.addByte(new Byte("FF"), this.index, false);
+                this.SystemCall();
             }
 
             for (var i = 0; i < node.getChildren().length; i++) {
@@ -263,6 +260,31 @@ module Compiler {
         public LoadXRegWithConst(constant: string): void {
             this.addByte(new Byte("A2"), this.index, false);
             this.addByte(new Byte(constant), this.index, false);
+        }
+
+        // A0 XX - load the Y Register with constant
+        public LoadYRegWithConst(constant: string): void {
+            this.addByte(new Byte("A0"), this.index, false);
+            this.addByte(new Byte(constant), this.index, false);
+        }
+
+        // FF - system call
+        public SystemCall(): void {
+            this.addByte(new Byte("FF"), this.index, false);
+        }
+
+        // Store string to heap -  returns the start of the memory location
+        public StoreStringToHeap(str: string): string {
+            // trim out the quotation marks
+            str = str.substring(1, str.length - 1);
+            // Add "00" to the end of string
+            this.addByte(new Byte("00"), this.heapIndex, true);
+            for (var i = str.length - 1; i > -1; i--) {
+                var hexVal = str.charCodeAt(i).toString(16);
+                this.addByte(new Byte(hexVal), this.heapIndex, true);
+            }
+
+            return (this.heapIndex + 1).toString(16);
         }
     }
 
