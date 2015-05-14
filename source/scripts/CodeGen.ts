@@ -68,7 +68,9 @@ module Compiler {
                     this.checkStaticTable(varName);
                 } else if(node.getChildren()[0].getName() == "boolean") {
                     // default value for boolean is false
-
+                    console.log((245).toString(16));
+                    this.StoreAccWithConst((245).toString(16));
+                    this.StoreAccInMem(varName);
                 }
             }
 
@@ -116,7 +118,6 @@ module Compiler {
                     this.LoadXRegWithConst(constant);
                 } else if(node.getChildren()[0].getName() == "StringExpr") {
                     // Case 2: string literal
-
                     var strLit = node.getChildren()[0].getChildren()[0].getName();
                     var memoryLocation = this.StoreStringToHeap(strLit);
                     console.log("Printing String Lit: " + strLit);

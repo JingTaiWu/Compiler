@@ -57,6 +57,10 @@ var Compiler;
                     this.checkStaticTable(varName);
                 }
                 else if (node.getChildren()[0].getName() == "boolean") {
+                    // default value for boolean is false
+                    console.log((245).toString(16));
+                    this.StoreAccWithConst((245).toString(16));
+                    this.StoreAccInMem(varName);
                 }
             }
             if (node.getName() == "AssignmentStatement") {
