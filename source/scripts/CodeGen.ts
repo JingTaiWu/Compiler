@@ -372,11 +372,18 @@ module Compiler {
             if(firstOperand.getName() == "==" || secondOperand.getName() == "!=") {
                 throw "Nested boolean expr is not supported yet."
             } else if(firstOperand.getName() == "StringExpr" && secondOperand.getName() == "StringExpr") {
-                var firstStr = firstOperand.getChildren()[0];
-                var secondStr = secondOperand.getChildren()[0];
+                var firstStr = firstOperand.getChildren()[0].getName();
+                var secondStr = secondOperand.getChildren()[0].getName();
                 // Going to cheat with javascript comparison
                 if(firstStr == secondStr) {
+                    this.LoadXRegWithConst("01");
+                } else {
+                    this.LoadXRegWithConst("02");
                 }
+                this.LoadAccWithConst("01");
+                this.StoreAccInMem("TT");
+                this.CompareMemoryToXReg("TT");
+                this.BranchNotEqual();
             } else if(firstOperand.getName() == "StringExpr" || secondOperand.getName() == "StringExpr"){
                 throw "ID to String comparison is not supported yet."
             } else {
