@@ -198,6 +198,7 @@ module Compiler {
                 if(node.getChildren()[0].getName() == "==") {
                     this.generateEquality(node.getChildren()[0]);
                 }
+                throw "While statement is not supported."
             }
 
             for (var i = 0; i < node.getChildren().length; i++) {
@@ -514,7 +515,7 @@ module Compiler {
         // Basically nagate equality
         public generateInequality(node: Node): void {
             this.generateEquality(node);
-            
+            throw "Inequality not supported yet."
         }
 
         // Generate integer expression
@@ -538,7 +539,7 @@ module Compiler {
                     this.AddWithCarry("TT");
                 }
 
-                // ACC has the sum
+                // ACC has the saum
                 this.AddWithCarry("TS");
                 this.StoreAccInMem("TS");
             }

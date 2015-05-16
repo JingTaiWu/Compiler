@@ -3,8 +3,8 @@
 /// <reference path="Node.ts"/>
 /// <reference path="Control.ts"/>
 /*
-    Parser - LL1 (Left most derivation with one token look ahead)
-    Grammar for parsing: http://www.labouseur.com/courses/compilers/grammar.pdf
+Parser - LL1 (Left most derivation with one token look ahead)
+Grammar for parsing: http://www.labouseur.com/courses/compilers/grammar.pdf
 */
 var Compiler;
 (function (Compiler) {
@@ -21,14 +21,17 @@ var Compiler;
             // Grab the next token
             this.currentToken = this.getNextToken();
             this.stdOut("Begin Parsing...");
+
             // Program is our ultimate production
             this.parseProgram();
             return true;
         };
+
         // parseProgram - Program ::== Block $
         Parser.prototype.parseProgram = function () {
             // Expecting a block and an EOF
             this.stdOut("Parsing a program.");
+
             // Make a node for CST
             var newNode = new Compiler.Node("Program");
             this.CST.addNode(newNode, "BRANCH");
@@ -36,6 +39,7 @@ var Compiler;
             this.checkToken("EOF_TOKEN");
             //this.CST.returnToParent();
         };
+
         // parseBlock - Block ::== {StatementList}
         Parser.prototype.parseBlock = function () {
             this.stdOut("Parsing a <strong>Block</strong>");
@@ -45,25 +49,23 @@ var Compiler;
             this.checkToken("CLOSE_BRACE_TOKEN");
             this.CST.returnToParent();
         };
+
         // parseStatementList - StatementList ::== Statement StatementList
         //                                    ::== epsilon
         Parser.prototype.parseStatementList = function () {
             this.stdOut("Parsing a <strong>StatementList</strong>.");
             this.CST.addNode(new Compiler.Node("StatementList"), "BRANCH");
+
             // Need to check for the next token
-            if (this.currentToken.getKind() == "PRINT_KEYWORD_TOKEN" ||
-                this.currentToken.getKind() == "IDENTIFIER_TOKEN" ||
-                this.currentToken.getKind() == "TYPE_TOKEN" ||
-                this.currentToken.getKind() == "WHILE_KEYWORD_TOKEN" ||
-                this.currentToken.getKind() == "IF_KEYWORD_TOKEN" ||
-                this.currentToken.getKind() == "OPEN_BRACE_TOKEN") {
+            if (this.currentToken.getKind() == "PRINT_KEYWORD_TOKEN" || this.currentToken.getKind() == "IDENTIFIER_TOKEN" || this.currentToken.getKind() == "TYPE_TOKEN" || this.currentToken.getKind() == "WHILE_KEYWORD_TOKEN" || this.currentToken.getKind() == "IF_KEYWORD_TOKEN" || this.currentToken.getKind() == "OPEN_BRACE_TOKEN") {
                 this.parseStatement();
                 this.parseStatementList();
-            }
-            else {
+            } else {
+                // Epsilon
             }
             this.CST.returnToParent();
         };
+
         // parseStatement - Statement ::== PrintStatement
         //                            ::== AssignmentStatement
         //                            ::== VarDecl
@@ -73,27 +75,24 @@ var Compiler;
         Parser.prototype.parseStatement = function () {
             this.stdOut("Parsing a <strong>Statement</strong>.");
             this.CST.addNode(new Compiler.Node("Statement"), "BRANCH");
+
             // Need to check for the next token
             if (this.currentToken.getKind() == "PRINT_KEYWORD_TOKEN") {
                 this.parsePrintStatement();
-            }
-            else if (this.currentToken.getKind() == "IDENTIFIER_TOKEN") {
+            } else if (this.currentToken.getKind() == "IDENTIFIER_TOKEN") {
                 this.parseAssignmentStatement();
-            }
-            else if (this.currentToken.getKind() == "TYPE_TOKEN") {
+            } else if (this.currentToken.getKind() == "TYPE_TOKEN") {
                 this.parseVarDecl();
-            }
-            else if (this.currentToken.getKind() == "WHILE_KEYWORD_TOKEN") {
+            } else if (this.currentToken.getKind() == "WHILE_KEYWORD_TOKEN") {
                 this.parseWhileStatement();
-            }
-            else if (this.currentToken.getKind() == "IF_KEYWORD_TOKEN") {
+            } else if (this.currentToken.getKind() == "IF_KEYWORD_TOKEN") {
                 this.parseIfStatement();
-            }
-            else {
+            } else {
                 this.parseBlock();
             }
             this.CST.returnToParent();
         };
+
         // parsePrintStatement - PrintStatement ::== print(Expr)
         Parser.prototype.parsePrintStatement = function () {
             this.stdOut("Parsing a <strong>PrintStatement</strong>.");
@@ -104,6 +103,7 @@ var Compiler;
             this.checkToken("CLOSE_PARENTHESIS_TOKEN");
             this.CST.returnToParent();
         };
+
         // parseAssignmentStatement - AssignmentStatement ::== Id = Expr
         Parser.prototype.parseAssignmentStatement = function () {
             this.stdOut("Parsing an <strong>AssignementStatement</strong>.");
@@ -113,6 +113,7 @@ var Compiler;
             this.parseExpr();
             this.CST.returnToParent();
         };
+
         // parseVarDecl - VarDecl ::== type Id
         Parser.prototype.parseVarDecl = function () {
             this.stdOut("Parsing <strong>VarDeclaration</strong>.");
@@ -121,6 +122,7 @@ var Compiler;
             this.parseId();
             this.CST.returnToParent();
         };
+
         // parseWhileStatement - WhileStatement ::== while BooleanExpr Block
         Parser.prototype.parseWhileStatement = function () {
             this.stdOut("Parsing <strong>WhileStatement</strong>");
@@ -130,6 +132,7 @@ var Compiler;
             this.parseBlock();
             this.CST.returnToParent();
         };
+
         // parseIfStatement - IfStatement ::== if BooleanExpr Block
         Parser.prototype.parseIfStatement = function () {
             this.stdOut("Parsing <strong>IfStatement</strong>.");
@@ -139,6 +142,7 @@ var Compiler;
             this.parseBlock();
             this.CST.returnToParent();
         };
+
         // parseExpr - Expr ::== IntExpr
         //                  ::== StringExpr
         //                  ::== BooleanExpr
@@ -148,19 +152,16 @@ var Compiler;
             this.CST.addNode(new Compiler.Node("Expr"), "BRANCH");
             if (this.currentToken.getKind() == "DIGIT_TOKEN") {
                 this.parseIntExpr();
-            }
-            else if (this.currentToken.getKind() == "QUOTATION_TOKEN") {
+            } else if (this.currentToken.getKind() == "QUOTATION_TOKEN") {
                 this.parseStringExpr();
-            }
-            else if (this.currentToken.getKind() == "BOOL_VAL_TOKEN" ||
-                this.currentToken.getKind() == "OPEN_PARENTHESIS_TOKEN") {
+            } else if (this.currentToken.getKind() == "BOOL_VAL_TOKEN" || this.currentToken.getKind() == "OPEN_PARENTHESIS_TOKEN") {
                 this.parseBooleanExpr();
-            }
-            else {
+            } else {
                 this.parseId();
             }
             this.CST.returnToParent();
         };
+
         // parseIntExpr - IntExpr ::== digit intop Expr
         //                        ::== digit
         Parser.prototype.parseIntExpr = function () {
@@ -171,13 +172,13 @@ var Compiler;
                 this.checkToken("DIGIT_TOKEN");
                 this.checkToken("INT_OP_TOKEN");
                 this.parseExpr();
-            }
-            else {
+            } else {
                 this.stdOut("Parsing an <strong>IntegerStatement</strong> (digit).");
                 this.checkToken("DIGIT_TOKEN");
             }
             this.CST.returnToParent();
         };
+
         // parseStringExpr - StringExpr ::== " CharList "
         Parser.prototype.parseStringExpr = function () {
             this.stdOut("Parsing a <strong>StringExpression</strong>.");
@@ -187,6 +188,7 @@ var Compiler;
             this.checkToken("QUOTATION_TOKEN");
             this.CST.returnToParent();
         };
+
         // parseBooleanExpr - BooleanExpr ::== (Expr boolop Expr)
         //                                ::== boolval
         Parser.prototype.parseBooleanExpr = function () {
@@ -198,12 +200,12 @@ var Compiler;
                 this.checkToken("BOOL_OP_TOKEN");
                 this.parseExpr();
                 this.checkToken("CLOSE_PARENTHESIS_TOKEN");
-            }
-            else {
+            } else {
                 this.checkToken("BOOL_VAL_TOKEN");
             }
             this.CST.returnToParent();
         };
+
         // parseId - Id ::== char
         Parser.prototype.parseId = function () {
             this.stdOut("Parsing an <strong>ID</strong>.");
@@ -211,6 +213,7 @@ var Compiler;
             this.checkToken("IDENTIFIER_TOKEN");
             this.CST.returnToParent();
         };
+
         // parseCharList - CharList ::== char CharList
         //                          ::== space CharList
         //                          ::== epsilon
@@ -221,15 +224,15 @@ var Compiler;
             if (this.currentToken.getKind() == "CHARACTER_TOKEN") {
                 this.checkToken("CHARACTER_TOKEN");
                 this.parseCharList();
-            }
-            else if (this.currentToken.getKind() == "SPACE_TOKEN") {
+            } else if (this.currentToken.getKind() == "SPACE_TOKEN") {
                 this.checkToken("SPACE_TOKEN");
                 this.parseCharList();
-            }
-            else {
+            } else {
+                // Epsilon
             }
             this.CST.returnToParent();
         };
+
         // checkToken - check if the current Token matches the expected type. Print an error if it doesn't.
         Parser.prototype.checkToken = function (expectedKind) {
             //this.stdOut("Current Index " + this.index);
@@ -252,25 +255,27 @@ var Compiler;
                 this.CST.addNode(newNode, "LEAF");
                 this.currentToken = this.getNextToken();
                 return true;
-            }
-            else {
-                var errStr = "Expecting <strong>[ " + expectedKind + " ]</strong>. Found <strong>[ " + this.currentToken.getValue()
-                    + " ]</strong>. On line " + this.currentToken.getLineNumber();
+            } else {
+                var errStr = "Expecting <strong>[ " + expectedKind + " ]</strong>. Found <strong>[ " + this.currentToken.getValue() + " ]</strong>. On line " + this.currentToken.getLineNumber();
                 this.errorCount++;
                 throw errStr;
             }
         };
+
         // getNextToken - return the token at current index and increment the index
         Parser.prototype.getNextToken = function () {
             // Assume the current token is EOF
             var thisToken = new Compiler.Token("", "", 0);
             if (this.index < this.tokenStream.length) {
                 thisToken = this.tokenStream[this.index];
+
                 //this.stdOut("Current Token: " + thisToken.getValue() + ". Token Kind: " + thisToken.getKind() + ".");
                 this.index++;
             }
+
             return thisToken;
         };
+
         // peek - returns the next token
         Parser.prototype.peek = function () {
             var nextIndex = this.index + 1;
@@ -278,11 +283,14 @@ var Compiler;
             if (nextIndex < this.tokenStream.length) {
                 thisToken = this.tokenStream[nextIndex];
             }
+
             return thisToken;
         };
+
         Parser.prototype.stdOut = function (msg) {
             Compiler.Control.stdOut("PARSER", msg);
         };
+
         Parser.prototype.getCST = function () {
             return this.CST;
         };
