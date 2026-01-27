@@ -190,15 +190,24 @@ module Compiler {
 
             if(node.getName() == "IfStatement") {
                 if(node.getChildren()[0].getName() == "==") {
-                    this.generateEquality(node.getChildren()[0]);
+                    this.generateEquality(node.getChildren()[0], "J" + (this.scopeNumber + 1));
                 }
             }
 
             if(node.getName() == "WhileStatement") {
-                if(node.getChildren()[0].getName() == "==") {
-                    this.generateEquality(node.getChildren()[0]);
+                var loopStartIndex = this.index;
+                var conditionNode = node.getChildren()[0];
+                var loopBlockNode = node.getChildren()[1];
+                if(conditionNode.getName() == "==") {
+                    this.generateEquality(conditionNode, "J" + (this.scopeNumber + 1));
                 }
-                throw "While statement is not supported."
+
+                if(loopBlockNode) {
+                    this.toMachineCode(loopBlockNode);
+                }
+
+                this.generateLoopBackBranch(loopStartIndex);
+                return;
             }
 
             for (var i = 0; i < node.getChildren().length; i++) {
@@ -385,9 +394,10 @@ module Compiler {
         }
 
         // D0 XX - branch if z flag is zero
-        public BranchNotEqual(): void {
+        public BranchNotEqual(jumpLabel?: string): void {
             this.addByte(new Byte("D0"), this.index, false);
-            var jumpTemp: JumpVar = new JumpVar("J" + this.scopeNumber);
+            var label = jumpLabel || ("J" + this.scopeNumber);
+            var jumpTemp: JumpVar = new JumpVar(label);
             var tempByte = new Byte(jumpTemp.tempName);
             tempByte.isJumpVar = true;
             this.JumpTable[jumpTemp.tempName] = jumpTemp;
@@ -432,7 +442,7 @@ module Compiler {
         }
 
         // generate boolean statement
-        public generateEquality(node: Node): void {
+        public generateEquality(node: Node, jumpLabel?: string): void {
             var firstOperand = node.getChildren()[0];
             var secondOperand = node.getChildren()[1];
             // string to string comparison
@@ -450,7 +460,7 @@ module Compiler {
                 this.LoadAccWithConst("01");
                 this.StoreAccInMem("TT");
                 this.CompareMemoryToXReg("TT");
-                this.BranchNotEqual();
+                this.BranchNotEqual(jumpLabel);
             } else if(firstOperand.getName() == "StringExpr" || secondOperand.getName() == "StringExpr"){
                 throw "ID to String comparison is not supported yet."
             } else {
@@ -463,12 +473,12 @@ module Compiler {
                     this.LoadAccWithConst(secondInt);
                     this.StoreAccInMem("TT");
                     this.CompareMemoryToXReg("TT");
-                    this.BranchNotEqual();
+                    this.BranchNotEqual(jumpLabel);
                 } else if(firstOperand.getName().match(/^[a-z]$/g) && secondOperand.getName().match(/^[a-z]$/g)) {
                     // ID to ID
                     this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
                     this.CompareMemoryToXReg(this.findStaticVar(secondOperand.getName()));
-                    this.BranchNotEqual();
+                    this.BranchNotEqual(jumpLabel);
                 } else if(firstOperand.getName().match(/^((true)|(false))$/g) || secondOperand.getName().match(/^((true)|(false))$/g)) {
                     // ID to boolean
                     if(firstOperand.getName().match(/^((true)|(false))$/g)) {
@@ -491,7 +501,7 @@ module Compiler {
                         this.LoadXRegFromMem(this.findStaticVar(secondOperand.getName()));
                     }        
                     this.CompareMemoryToXReg("TT");
-                    this.BranchNotEqual();
+                    this.BranchNotEqual(jumpLabel);
                 } else if(firstOperand.getName().match(/^[0-9]$/g) || secondOperand.getName().match(/^[0-9]$/g)) {
                     if(firstOperand.getName().match(/^[a-z]$/g)) {
                         this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
@@ -507,9 +517,23 @@ module Compiler {
 
                     this.StoreAccInMem("TT");
                     this.CompareMemoryToXReg("TT");
-                    this.BranchNotEqual();
+                    this.BranchNotEqual(jumpLabel);
                 }
             }
+        }
+
+        public generateLoopBackBranch(loopStartIndex: number): void {
+            this.LoadXRegWithConst("01");
+            this.LoadAccWithConst("00");
+            this.StoreAccInMem("TT");
+            this.CompareMemoryToXReg("TT");
+            var branchInstructionSize = 2;
+            var distance = this.index + branchInstructionSize - loopStartIndex;
+            var offset = 256 - distance;
+            var offsetString = offset.toString(16).toUpperCase();
+            offsetString = (offsetString.length < 2) ? "0" + offsetString : offsetString;
+            this.addByte(new Byte("D0"), this.index, false);
+            this.addByte(new Byte(offsetString), this.index, false);
         }
 
         // Basically nagate equality
