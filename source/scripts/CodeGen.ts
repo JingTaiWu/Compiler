@@ -191,22 +191,32 @@ module Compiler {
             if(node.getName() == "IfStatement") {
                 if(node.getChildren()[0].getName() == "==") {
                     this.generateEquality(node.getChildren()[0], "J" + (this.scopeNumber + 1));
+                } else if(node.getChildren()[0].getName() == "!=") {
+                    this.generateInequality(node.getChildren()[0], "J" + (this.scopeNumber + 1));
                 }
             }
 
             if(node.getName() == "WhileStatement") {
                 var loopStartIndex = this.index;
+                var jumpLabel = "J" + (this.scopeNumber + 1);
                 var conditionNode = node.getChildren()[0];
                 var loopBlockNode = node.getChildren()[1];
                 if(conditionNode.getName() == "==") {
-                    this.generateEquality(conditionNode, "J" + (this.scopeNumber + 1));
+                    this.generateEquality(conditionNode, jumpLabel);
+                } else if(conditionNode.getName() == "!=") {
+                    this.generateInequality(conditionNode, jumpLabel);
                 }
 
                 if(loopBlockNode) {
                     this.toMachineCode(loopBlockNode);
                 }
 
+                var indexBeforeLoopBack = this.index;
                 this.generateLoopBackBranch(loopStartIndex);
+                // Fix: the exit branch must also skip past the loop-back branch bytes
+                if(this.JumpTable[jumpLabel]) {
+                    this.JumpTable[jumpLabel].distance += (this.index - indexBeforeLoopBack);
+                }
                 return;
             }
 
@@ -393,9 +403,20 @@ module Compiler {
             this.addByte(new Byte("00"), this.index, false);
         }
 
-        // D0 XX - branch if z flag is zero
+        // D0 XX - branch if z flag is zero (not equal)
         public BranchNotEqual(jumpLabel?: string): void {
             this.addByte(new Byte("D0"), this.index, false);
+            var label = jumpLabel || ("J" + this.scopeNumber);
+            var jumpTemp: JumpVar = new JumpVar(label);
+            var tempByte = new Byte(jumpTemp.tempName);
+            tempByte.isJumpVar = true;
+            this.JumpTable[jumpTemp.tempName] = jumpTemp;
+            this.addByte(tempByte, this.index, false);
+        }
+
+        // F0 XX - branch if z flag is one (equal)
+        public BranchEqual(jumpLabel?: string): void {
+            this.addByte(new Byte("F0"), this.index, false);
             var label = jumpLabel || ("J" + this.scopeNumber);
             var jumpTemp: JumpVar = new JumpVar(label);
             var tempByte = new Byte(jumpTemp.tempName);
@@ -536,10 +557,77 @@ module Compiler {
             this.addByte(new Byte(offsetString), this.index, false);
         }
 
-        // Basically nagate equality
-        public generateInequality(node: Node): void {
-            this.generateEquality(node);
-            throw "Inequality not supported yet."
+        // Generate inequality condition (!=): branch past body when operands ARE equal (condition false)
+        public generateInequality(node: Node, jumpLabel?: string): void {
+            var firstOperand = node.getChildren()[0];
+            var secondOperand = node.getChildren()[1];
+            if(firstOperand.getName() == "==" || secondOperand.getName() == "!=") {
+                throw "Nested boolean expr is not supported yet."
+            } else if(firstOperand.getName() == "StringExpr" && secondOperand.getName() == "StringExpr") {
+                var firstStr = firstOperand.getChildren()[0].getName();
+                var secondStr = secondOperand.getChildren()[0].getName();
+                if(firstStr == secondStr) {
+                    this.LoadXRegWithConst("01");
+                } else {
+                    this.LoadXRegWithConst("02");
+                }
+                this.LoadAccWithConst("01");
+                this.StoreAccInMem("TT");
+                this.CompareMemoryToXReg("TT");
+                this.BranchEqual(jumpLabel);
+            } else if(firstOperand.getName() == "StringExpr" || secondOperand.getName() == "StringExpr"){
+                throw "ID to String comparison is not supported yet."
+            } else {
+                if(firstOperand.getName().match(/^[0-9]$/g) && secondOperand.getName().match(/^[0-9]$/g)) {
+                    var firstInt = firstOperand.getName();
+                    var secondInt = secondOperand.getName();
+                    this.LoadXRegWithConst(firstInt);
+                    this.LoadAccWithConst(secondInt);
+                    this.StoreAccInMem("TT");
+                    this.CompareMemoryToXReg("TT");
+                    this.BranchEqual(jumpLabel);
+                } else if(firstOperand.getName().match(/^[a-z]$/g) && secondOperand.getName().match(/^[a-z]$/g)) {
+                    this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
+                    this.CompareMemoryToXReg(this.findStaticVar(secondOperand.getName()));
+                    this.BranchEqual(jumpLabel);
+                } else if(firstOperand.getName().match(/^((true)|(false))$/g) || secondOperand.getName().match(/^((true)|(false))$/g)) {
+                    if(firstOperand.getName().match(/^((true)|(false))$/g)) {
+                        if(firstOperand.getName() == "true") {
+                            this.LoadAccWithConst("FB");
+                        } else {
+                            this.LoadAccWithConst("F5");
+                        }
+                    } else {
+                        if(secondOperand.getName() == "true") {
+                            this.LoadAccWithConst("FB");
+                        } else {
+                            this.LoadAccWithConst("F5");
+                        }
+                    }
+                    this.StoreAccInMem("TT");
+                    if(firstOperand.getName().match(/^[a-z]$/g)) {
+                        this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
+                    } else {
+                        this.LoadXRegFromMem(this.findStaticVar(secondOperand.getName()));
+                    }
+                    this.CompareMemoryToXReg("TT");
+                    this.BranchEqual(jumpLabel);
+                } else if(firstOperand.getName().match(/^[0-9]$/g) || secondOperand.getName().match(/^[0-9]$/g)) {
+                    if(firstOperand.getName().match(/^[a-z]$/g)) {
+                        this.LoadXRegFromMem(this.findStaticVar(firstOperand.getName()));
+                    } else {
+                        this.LoadXRegFromMem(this.findStaticVar(secondOperand.getName()));
+                    }
+                    if(firstOperand.getName().match(/^[0-9]$/g)) {
+                        this.LoadAccWithConst(firstOperand.getName());
+                    } else {
+                        this.LoadAccWithConst(secondOperand.getName());
+                    }
+                    this.StoreAccInMem("TT");
+                    this.CompareMemoryToXReg("TT");
+                    this.BranchEqual(jumpLabel);
+                }
+            }
         }
 
         // Generate integer expression

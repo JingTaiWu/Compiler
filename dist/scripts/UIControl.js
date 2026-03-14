@@ -32,8 +32,14 @@ $(document).ready(function () {
         var codeStr = "{\n\tint a\n\tstring a\n\tboolean a\n}$";
         $("#codeInput").text(codeStr);
     });
-    // $("#example_4").click(function() {
-    //     var codeStr = "{\n\tint a = 0\n}$"
-    //     $("#codeInput").text(codeStr);
-    // });
+    // while (a == 0): runs loop body once when a equals 0, then exits
+    $("#example_4").click(function () {
+        var codeStr = "{\n\tint a\n\ta = 0\n\tint b\n\tb = 5\n\twhile (a == 0) {\n\t\tprint(a)\n\t\ta = 1\n\t}\n\tprint(b)\n}$";
+        $("#codeInput").text(codeStr);
+    });
+    // while (a != b): loops while a is not equal to b
+    $("#example_5").click(function () {
+        var codeStr = "{\n\tint a\n\ta = 0\n\tint b\n\tb = 1\n\twhile (a != b) {\n\t\tprint(a)\n\t\ta = 1\n\t}\n\tprint(b)\n}$";
+        $("#codeInput").text(codeStr);
+    });
 });
